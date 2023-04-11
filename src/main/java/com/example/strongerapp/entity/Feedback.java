@@ -6,28 +6,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 
+/**
+ * 선생님 피드백 Entity
+ */
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
 @Builder
-public class User {
+@Data
+public class Feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String username;
+    @ManyToOne
+    private Feedback feedback;
 
-    private String password;
-
-    @Column(unique = true)
-    private String email;
-
-    private LocalDate birthday;
-
+    private String comment;
 
 }

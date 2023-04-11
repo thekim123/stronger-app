@@ -6,28 +6,29 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 
+/**
+ * 자가피드백 Entity
+ */
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
 @Builder
-public class User {
+@Data
+public class SelfFeedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    private String username;
+    @ManyToOne
+    private Plan plan;
 
-    private String password;
+    // 실패 이유
+    private String reason;
 
-    @Column(unique = true)
-    private String email;
-
-    private LocalDate birthday;
+    // 대책
+    private String measure;
 
 
 }
