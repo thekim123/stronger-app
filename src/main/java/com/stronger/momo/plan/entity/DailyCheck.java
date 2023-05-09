@@ -22,7 +22,8 @@ public class DailyCheck extends BaseTimeEntity {
 
     private LocalDate checkDate;
 
-    private boolean isCompleted;
+    @Builder.Default
+    private boolean isCompleted = true;
 
     @JoinColumn(name = "planId")
     @ManyToOne
