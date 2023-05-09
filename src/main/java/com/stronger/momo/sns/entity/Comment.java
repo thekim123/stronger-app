@@ -1,18 +1,22 @@
 package com.stronger.momo.sns.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
+import com.stronger.momo.sns.dto.CommentDto;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
+/**
+ * sns 댓글
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
+@Entity(name = "Comment")
+@Table(name = "comment")
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -23,6 +27,15 @@ public class Comment extends BaseTimeEntity {
     @ManyToOne
     private Sns sns;
     @ManyToOne
-    private User user;
+    private User writer;
+
+    /**
+     * comment dto -> entity 메서드
+     *
+     * @param dto comment dto
+     */
+    public void updateComment(CommentDto dto) {
+        this.comment = dto.getComment();
+    }
 
 }

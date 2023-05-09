@@ -17,9 +17,4 @@ public class SelfFeedbackDto {
     private String reason;
     private String measure;
 
-    public SelfFeedback toEntity() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        return mapper.map(this, SelfFeedback.class);
-    }
 }

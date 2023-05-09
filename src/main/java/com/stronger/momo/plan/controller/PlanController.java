@@ -82,7 +82,7 @@ public class PlanController {
     @PostMapping("/{planId}/feedback")
     public ResponseEntity<?> createFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long planId) {
         planService.createFeedback(authentication, dto, planId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("셀프 피드백 작성이 완료되었습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).body("교관 피드백 작성이 완료되었습니다.");
     }
 
     /**
@@ -96,7 +96,7 @@ public class PlanController {
     @DeleteMapping("/{planId}/feedback/{feedbackId}")
     public ResponseEntity<?> deleteFeedback(Authentication authentication, @PathVariable Long feedbackId, @PathVariable Long planId) throws AccessDeniedException {
         planService.deleteFeedback(authentication, feedbackId, planId);
-        return ResponseEntity.status(HttpStatus.OK).body("셀프 피드백 삭제가 완료되었습니다");
+        return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 삭제가 완료되었습니다");
     }
 
     /**
@@ -110,7 +110,7 @@ public class PlanController {
     @PutMapping("/{planId}/feedback")
     public ResponseEntity<?> updateFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long planId) throws AccessDeniedException {
         planService.updateFeedback(authentication, dto, planId);
-        return ResponseEntity.status(HttpStatus.OK).body("셀프 피드백 수정이 완료되었습니다.");
+        return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 수정이 완료되었습니다.");
     }
 
     /**

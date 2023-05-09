@@ -18,11 +18,6 @@ public class PlanCreateDto {
     private String title;
     private String content;
     private Integer goalCount;
-
-    public Plan toEntity() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        return mapper.map(this, Plan.class);
-    }
+    private Long teamId;
 
 }

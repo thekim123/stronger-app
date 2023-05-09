@@ -1,20 +1,22 @@
 package com.stronger.momo.user.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.config.security.PrincipalDetails;
+import com.stronger.momo.team.entity.Team;
+import com.stronger.momo.team.entity.TeamMember;
+import com.stronger.momo.sns.entity.Sns;
 import lombok.*;
-import org.springframework.security.core.Authentication;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Entity(name = "User")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
+@Table(name = "user")
 public class User extends BaseTimeEntity {
 
     @Id
@@ -31,9 +33,13 @@ public class User extends BaseTimeEntity {
 
     private LocalDate birthday;
 
-    public User getEntityByAuthentication(Authentication authentication) {
-        return ((PrincipalDetails) authentication.getPrincipal()).getUser();
-    }
+    @OneToMany(mappedBy = "owner")
+    private List<Team> teamList;
 
+    @OneToMany(mappedBy = "member")
+    private List<TeamMember> teamMemberList;
+
+    @OneToMany(mappedBy = "writer")
+    private List<Sns> snsList;
 
 }

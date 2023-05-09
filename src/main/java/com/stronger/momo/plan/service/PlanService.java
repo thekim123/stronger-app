@@ -13,18 +13,23 @@ import com.stronger.momo.plan.repository.DailyCheckRepository;
 import com.stronger.momo.plan.repository.FeedbackRepository;
 import com.stronger.momo.plan.repository.PlanRepository;
 import com.stronger.momo.plan.repository.SelfFeedbackRepository;
+import com.stronger.momo.team.entity.Team;
+import com.stronger.momo.team.entity.TeamMember;
+import com.stronger.momo.team.entity.Grade;
+import com.stronger.momo.team.repository.TeamRepository;
 import com.stronger.momo.user.entity.User;
+import com.stronger.momo.team.repository.TeamMemberRepository;
 import com.stronger.momo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
-import java.nio.file.AccessDeniedException;
-import java.time.DayOfWeek;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -37,6 +42,8 @@ public class PlanService {
     private final SelfFeedbackRepository selfFeedbackRepository;
     private final FeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final TeamRepository teamRepository;
 
 
     @PersistenceContext
@@ -50,12 +57,29 @@ public class PlanService {
      */
     @Transactional
     public void createPlan(Authentication authentication, PlanCreateDto dto) {
-        Plan entity = dto.toEntity();
-        User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        entity.setOwner(owner);
-        entity.setActionCount(0);
-        entity.setCurrentWeeks(0);
-        planRepository.save(entity);
+        User member = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        Team team = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
+        });
+
+        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다.");
+        });
+
+        if (Objects.equals(teamMember.getGrade(), Grade.PENDING)) {
+            throw new AccessDeniedException("대기자는 계획을 작성할 수 없습니다");
+        }
+
+        Plan plan = Plan.builder()
+                .owner(member)
+                .actionCount(0)
+                .currentWeeks(0)
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .goalCount(dto.getGoalCount())
+                .team(team)
+                .build();
+        planRepository.save(plan);
     }
 
 
@@ -85,10 +109,11 @@ public class PlanService {
     public void updatePlan(Authentication authentication, PlanUpdateDto dto) throws AccessDeniedException {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         isPlanOwner(dto.getId(), owner.getId());
-        Plan entity = dto.toEntity();
+        Plan entity = planRepository.findById(dto.getId()).orElseThrow(() -> {
+            throw new EntityNotFoundException("계획이 존재하지 않습니다.");
+        });
 
-        entityManager.merge(entity);
-        entityManager.flush();
+        entity.update(dto);
     }
 
 
@@ -108,16 +133,14 @@ public class PlanService {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
-        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
-
-        if (dailyCheckRepository.findByPlanAndWeeksAndDayOfWeek(plan, plan.getCurrentWeeks(), dayOfWeek).isPresent()) {
-            throw new AccessDeniedException("이미 계획 완수를 하셨습니다.");
+        LocalDate checkDate = LocalDate.now();
+        if (dailyCheckRepository.findByPlanAndCheckDate(plan, checkDate).isPresent()) {
+            throw new AccessDeniedException("오늘은 이미 완수했어요!!");
         }
 
         DailyCheck dailyCheck = DailyCheck.builder()
                 .weeks(plan.getCurrentWeeks())
-                .dayOfWeek(dayOfWeek)
-                // 항상 true 인거 바꾸자!!
+                .checkDate(checkDate)
                 .isCompleted(true)
                 .plan(plan)
                 .build();
@@ -140,10 +163,13 @@ public class PlanService {
         Plan plan = planRepository.findById(planId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
+        isPlanInstructor(authentication, planId);
 
-        Feedback feedback = dto.toEntity();
-        feedback.setPlan(plan);
-        feedback.setUser(user);
+        Feedback feedback = Feedback.builder()
+                .plan(plan)
+                .user(user)
+                .comment(dto.getComment())
+                .build();
         feedbackRepository.save(feedback);
     }
 
@@ -158,7 +184,7 @@ public class PlanService {
     @Transactional
     public void deleteFeedback(Authentication authentication, Long feedbackId, Long planId) throws AccessDeniedException {
         isPlanInstructor(authentication, planId);
-        selfFeedbackRepository.deleteById(feedbackId);
+        feedbackRepository.deleteById(feedbackId);
     }
 
 
@@ -173,9 +199,10 @@ public class PlanService {
     @Transactional
     public void updateFeedback(Authentication authentication, FeedbackDto dto, Long planId) throws AccessDeniedException {
         isPlanInstructor(authentication, planId);
-        Feedback entity = dto.toEntity();
-        entityManager.merge(entity);
-        entityManager.flush();
+        Feedback entity = feedbackRepository.findById(dto.getId()).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 교관 피드백이 존재하지 않습니다");
+        });
+        entity.update(dto);
     }
 
 
@@ -191,8 +218,11 @@ public class PlanService {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
-        SelfFeedback selfFeedback = dto.toEntity();
-        selfFeedback.setPlan(plan);
+        SelfFeedback selfFeedback = SelfFeedback.builder()
+                .reason(dto.getReason())
+                .measure(dto.getMeasure())
+                .plan(plan)
+                .build();
         selfFeedbackRepository.save(selfFeedback);
     }
 
@@ -225,9 +255,11 @@ public class PlanService {
     public void updateSelfFeedback(Authentication authentication, SelfFeedbackDto dto, Long planId) throws AccessDeniedException {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         isPlanOwner(planId, user.getId());
-        SelfFeedback entity = dto.toEntity();
-        entityManager.merge(entity);
-        entityManager.flush();
+        SelfFeedback entity = selfFeedbackRepository.findById(dto.getId()).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 셀프 피드백이 존재하지 않습니다");
+        });
+
+        entity.update(dto);
     }
 
 
@@ -268,8 +300,14 @@ public class PlanService {
             throw new EntityNotFoundException("해당 계획을 찾을 수 없습니다.");
         });
 
-        if (!Objects.equals(plan.getInstructor().getId(), user.getId())) {
+        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(user, plan.getTeam()).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다.");
+        });
+        Grade grade = teamMember.getGrade();
+        if (grade.equals(Grade.MEMBER) || grade.equals(Grade.PENDING)) {
             throw new AccessDeniedException("해당 계획의 교관이 아닙니다.");
         }
     }
+
+
 }

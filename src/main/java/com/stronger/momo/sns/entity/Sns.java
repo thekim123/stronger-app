@@ -1,18 +1,19 @@
 package com.stronger.momo.sns.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
+import com.stronger.momo.sns.dto.SnsDto;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * SNS Entity
  * 계획 실천 중 공유할 때 사용
  */
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Entity(name = "Sns")
+@Table(name = "sns")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,7 +27,13 @@ public class Sns extends BaseTimeEntity {
 
     private String content;
 
+    @JoinColumn(name = "writerId")
     @ManyToOne
-    private User user;
+    private User writer;
+
+    public void updateSns(SnsDto dto) {
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+    }
 
 }

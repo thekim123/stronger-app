@@ -1,11 +1,14 @@
 package com.stronger.momo.plan.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
+import com.stronger.momo.plan.dto.PlanUpdateDto;
+import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,14 +16,13 @@ import java.util.List;
  * 계획  Entity
  * 초기에는 무조건 1주일 단위로 설정된다.
  */
-
-
 @EqualsAndHashCode(callSuper = true)
-@Entity
+@Entity(name = "Plan")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
+@Table(name = "plan")
 public class Plan extends BaseTimeEntity {
 
     @Id
@@ -36,22 +38,32 @@ public class Plan extends BaseTimeEntity {
     private Integer goalCount;
 
     // 실천 횟수
-    @Column(nullable = false)
+    @Column
     private Integer actionCount;
 
     private Integer currentWeeks;
 
+    @JoinColumn(name = "ownerId")
     @ManyToOne
     private User owner;
-
+    @JoinColumn(name = "groupId")
     @ManyToOne
-    private User Instructor;
-
-    @OneToMany
-    private List<DailyCheck> dailyCheck;
-    @OneToMany
+    private Team team;
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<DailyCheck> dailyCheckList = new ArrayList<>();
+    @OneToMany(mappedBy = "plan")
+    @Builder.Default
     private List<SelfFeedback> selfFeedbackList = new ArrayList<>();
-    @OneToMany
+    @OneToMany(mappedBy = "plan")
+    @Builder.Default
     private List<Feedback> feedbackList = new ArrayList<>();
+
+    public void update(PlanUpdateDto dto) {
+        this.goalCount = dto.getGoalCount();
+        this.title = dto.getTitle();
+        this.content = dto.getContent();
+    }
+
 
 }

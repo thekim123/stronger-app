@@ -15,12 +15,6 @@ import org.modelmapper.convention.MatchingStrategies;
 @NoArgsConstructor
 public class FeedbackDto {
     private Long id;
-    private String reason;
-    private String measure;
+    private String comment;
 
-    public Feedback toEntity() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        return mapper.map(this, Feedback.class);
-    }
 }

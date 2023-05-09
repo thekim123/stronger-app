@@ -1,6 +1,5 @@
 package com.stronger.momo.user.service;
 
-import com.stronger.momo.config.security.PrincipalDetails;
 import com.stronger.momo.user.dto.UserDto;
 import com.stronger.momo.user.entity.User;
 import com.stronger.momo.user.repository.UserRepository;
@@ -15,6 +14,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    /**
+     * 회원가입 서비스 메서드
+     *
+     * @param dto 회원 dto
+     */
     @Transactional
     public void join(UserDto dto) {
         System.out.println(dto.getPassword());

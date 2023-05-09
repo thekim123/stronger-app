@@ -18,10 +18,4 @@ public class PlanUpdateDto {
     private String content;
     private Integer goalCount;
 
-    public Plan toEntity() {
-        ModelMapper mapper = new ModelMapper();
-        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        return mapper.map(this, Plan.class);
-    }
-
 }
