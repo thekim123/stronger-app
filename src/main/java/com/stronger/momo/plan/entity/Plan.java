@@ -5,7 +5,7 @@ import com.stronger.momo.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +41,10 @@ public class Plan extends BaseTimeEntity {
 
     private Integer currentWeeks;
 
+    private Integer totalWeeks;
+    private LocalDate startDate;
+    private LocalDate endDate;
+
     @ManyToOne
     private User owner;
 
@@ -48,10 +52,13 @@ public class Plan extends BaseTimeEntity {
     private User Instructor;
 
     @OneToMany
-    private List<DailyCheck> dailyCheck;
+    @Builder.Default
+    private List<DailyCheck> dailyCheck = new ArrayList<>();
     @OneToMany
+    @Builder.Default
     private List<SelfFeedback> selfFeedbackList = new ArrayList<>();
     @OneToMany
+    @Builder.Default
     private List<Feedback> feedbackList = new ArrayList<>();
 
 }

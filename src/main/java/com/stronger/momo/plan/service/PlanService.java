@@ -26,6 +26,8 @@ import javax.persistence.PersistenceContext;
 import java.nio.file.AccessDeniedException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -43,6 +45,15 @@ public class PlanService {
     private EntityManager entityManager;
 
     /**
+     *
+     */
+    @Transactional(readOnly = true)
+    public List<Plan> getPlan(Authentication authentication) {
+        User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        return planRepository.mFindTodoList(owner, LocalDate.now());
+    }
+
+    /**
      * 계획 생성 서비스 메서드
      *
      * @param authentication 유저 인증 정보
@@ -55,6 +66,10 @@ public class PlanService {
         entity.setOwner(owner);
         entity.setActionCount(0);
         entity.setCurrentWeeks(0);
+
+        LocalDate startDate = dto.getStartDate().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+        entity.setStartDate(startDate);
+        entity.setEndDate(startDate.plusWeeks(dto.getTotalWeeks()));
         planRepository.save(entity);
     }
 

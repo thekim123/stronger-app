@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
+import java.time.LocalDate;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,6 +20,9 @@ public class PlanCreateDto {
     private String title;
     private String content;
     private Integer goalCount;
+    private Integer totalWeeks;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public Plan toEntity() {
         ModelMapper mapper = new ModelMapper();

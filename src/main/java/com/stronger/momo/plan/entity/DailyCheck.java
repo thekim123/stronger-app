@@ -22,7 +22,8 @@ public class DailyCheck extends BaseTimeEntity {
 
     private DayOfWeek dayOfWeek;
 
-    private boolean isCompleted;
+    @Builder.Default
+    private boolean isCompleted = true;
 
     @ManyToOne
     private Plan plan;
