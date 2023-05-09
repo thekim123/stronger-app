@@ -34,10 +34,20 @@ public class TeamService {
     @Transactional(readOnly = true)
     public List<TeamDto> getMyTeamList(Authentication authentication) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        List<TeamDto> teamDtoList = new ArrayList<>();
+
+        List<TeamMember> teamMemberList = teamMemberRepository.findByMember(user);
+        teamMemberList.stream()
+                .filter(teamMember -> !Objects.equals(teamMember.getGrade(), Grade.OWNER))
+                .map(TeamDto::fromMember)
+                .forEach(teamDtoList::add);
+
         List<Team> teamList = teamRepository.findByOwner(user);
-        return teamList.stream()
-                .map(TeamDto::from)
-                .collect(Collectors.toList());
+        teamList.stream()
+                .map(TeamDto::fromOwner)
+                .forEach(teamDtoList::add);
+
+        return teamDtoList;
     }
 
     /**
@@ -113,7 +123,7 @@ public class TeamService {
      * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @Transactional
-    public void updateGroup(Authentication authentication, TeamDto dto) throws AccessDeniedException {
+    public void updateTeam(Authentication authentication, TeamDto dto) throws AccessDeniedException {
         Team team = teamRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("팀이 존재하지 않습니다.");
         });

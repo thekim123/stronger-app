@@ -40,6 +40,7 @@ public class Team extends BaseTimeEntity {
     public void update(TeamDto dto) {
         this.groupName = dto.getTeamName();
         this.description = dto.getDescription();
+        this.isOpen = dto.isOpen();
     }
 
 }

@@ -74,11 +74,11 @@ public class TeamController {
      *
      * @param authentication 로그인 인증 정보
      * @param dto            그룹 dto
-     * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @PutMapping("/update")
-    public ResponseEntity<?> updateGroup(Authentication authentication, @RequestBody TeamDto dto) throws AccessDeniedException {
-        teamService.updateGroup(authentication, dto);
+    public ResponseEntity<?> updateTeam(Authentication authentication, @RequestBody TeamDto dto) {
+        System.out.println(dto);
+        teamService.updateTeam(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("팀 정보 수정이 완료되었습니다.");
     }
 

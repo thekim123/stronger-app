@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class Plan extends BaseTimeEntity {
     private Integer actionCount;
 
     private Integer currentWeeks;
+
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @JoinColumn(name = "ownerId")
     @ManyToOne

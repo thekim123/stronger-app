@@ -37,7 +37,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String token = request.getHeader(JwtProperties.HEADER_STRING)
                 .replace(JwtProperties.TOKEN_PREFIX, "");
 
-        System.out.println(token);
         String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
                 .getClaim("username").asString();
 
