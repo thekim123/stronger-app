@@ -42,6 +42,7 @@ public class TeamDto {
                 .isOwner(true)
                 .build();
     }
+
     public static TeamDto fromMember(TeamMember teamMember) {
         Team team = teamMember.getTeam();
         return TeamDto.builder()

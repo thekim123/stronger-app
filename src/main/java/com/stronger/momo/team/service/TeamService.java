@@ -2,7 +2,7 @@ package com.stronger.momo.team.service;
 
 import com.stronger.momo.config.security.PrincipalDetails;
 import com.stronger.momo.team.dto.TeamDto;
-import com.stronger.momo.team.dto.GradeDto;
+import com.stronger.momo.team.dto.TeamMemberDto;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.team.entity.Grade;
@@ -31,12 +31,42 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final UserRepository userRepository;
 
+    /**
+     * 그룹원 목록 조회 서비스 로직
+     *
+     * @param authentication 로그인 인증 정보
+     * @param teamId         그룹 id
+     * @return 그룹원 목록 dto
+     * @throws AccessDeniedException   권한 없음 예외
+     * @throws EntityNotFoundException 그룹 없음 예외
+     */
+    @Transactional(readOnly = true)
+    public List<TeamMemberDto> getTeamMemberList(Authentication authentication, Long teamId) throws AccessDeniedException, EntityNotFoundException {
+        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        Team team = teamRepository.findById(teamId).orElseThrow(EntityNotFoundException::new);
+
+        if (teamMemberRepository.findByUserAndTeam(user, team).isEmpty()) {
+            throw new AccessDeniedException("해당 그룹에 가입되어 있지 않습니다.");
+        }
+
+        List<TeamMember> teamMemberList = teamMemberRepository.findByTeam(team);
+        return teamMemberList.stream()
+                .map(TeamMemberDto::fromTeamMember)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 내 그룹 목록 조회 서비스 로직
+     *
+     * @param authentication 로그인 인증 정보
+     * @return 내 그룹 목록 dto
+     */
     @Transactional(readOnly = true)
     public List<TeamDto> getMyTeamList(Authentication authentication) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         List<TeamDto> teamDtoList = new ArrayList<>();
 
-        List<TeamMember> teamMemberList = teamMemberRepository.findByMember(user);
+        List<TeamMember> teamMemberList = teamMemberRepository.findByUser(user);
         teamMemberList.stream()
                 .filter(teamMember -> !Objects.equals(teamMember.getGrade(), Grade.OWNER))
                 .map(TeamDto::fromMember)
@@ -84,7 +114,7 @@ public class TeamService {
         TeamMember teamMember = TeamMember.builder()
                 .grade(Grade.OWNER)
                 .team(team)
-                .member(owner)
+                .user(owner)
                 .build();
 
         teamRepository.save(team);
@@ -155,7 +185,7 @@ public class TeamService {
         TeamMember teamMember = TeamMember.builder()
                 .grade(Grade.PENDING)
                 .team(team)
-                .member(joinUser)
+                .user(joinUser)
                 .build();
         teamMemberRepository.save(teamMember);
     }
@@ -169,13 +199,13 @@ public class TeamService {
      * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @Transactional
-    public void updatePosition(Authentication authentication, GradeDto dto) throws AccessDeniedException {
+    public void updatePosition(Authentication authentication, TeamMemberDto dto) throws AccessDeniedException {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
         });
 
-        User user = userRepository.findById(dto.getMemberId()).orElseThrow(() -> {
+        User user = userRepository.findById(dto.getUserId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 유저가 존재하지 않습니다.");
         });
 
@@ -187,7 +217,7 @@ public class TeamService {
             throw new AccessDeniedException("팀장이 아닙니다. 권한이 없습니다.");
         }
 
-        teamMember.update(user, team, dto.getPositionName());
+        teamMember.update(user, team, dto.getGradeName());
     }
 
     /**
@@ -198,14 +228,14 @@ public class TeamService {
      * @throws AccessDeniedException 신청 정보가 본인이 아닌 경우
      */
     @Transactional
-    public void leaveTeam(Authentication authentication, GradeDto dto) throws AccessDeniedException {
+    public void leaveTeam(Authentication authentication, TeamMemberDto dto) throws AccessDeniedException {
         TeamMember teamMember = teamMemberRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀원은 존재하지 않습니다.");
         });
 
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
 
-        if (!user.getUsername().equals(teamMember.getMember().getUsername())) {
+        if (!user.getUsername().equals(teamMember.getUser().getUsername())) {
             throw new AccessDeniedException("탈퇴는 본인만 할 수 있습니다.");
         }
 
@@ -220,7 +250,7 @@ public class TeamService {
      * @throws AccessDeniedException 그룹장이 아닌 경우
      */
     @Transactional
-    public void banUser(Authentication authentication, GradeDto dto) throws AccessDeniedException {
+    public void banUser(Authentication authentication, TeamMemberDto dto) throws AccessDeniedException {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다.");

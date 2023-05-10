@@ -1,10 +1,7 @@
 package com.stronger.momo.plan.service;
 
 import com.stronger.momo.config.security.PrincipalDetails;
-import com.stronger.momo.plan.dto.FeedbackDto;
-import com.stronger.momo.plan.dto.PlanCreateDto;
-import com.stronger.momo.plan.dto.PlanUpdateDto;
-import com.stronger.momo.plan.dto.SelfFeedbackDto;
+import com.stronger.momo.plan.dto.*;
 import com.stronger.momo.plan.entity.DailyCheck;
 import com.stronger.momo.plan.entity.Feedback;
 import com.stronger.momo.plan.entity.Plan;
@@ -26,11 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceContext;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -46,8 +43,18 @@ public class PlanService {
     private final TeamRepository teamRepository;
 
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Transactional(readOnly = true)
+    public List<PlanDto> getPlan(Authentication authentication) {
+        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        List<TeamMember> teamMemberList = teamMemberRepository.findByUser(user);
+        List<Plan> resultList = new ArrayList<>();
+        teamMemberList.forEach(teamMember -> {
+            List<Plan> plan = planRepository.mfindByOwnerAndDate(teamMember, LocalDate.now());
+            resultList.addAll(plan);
+        });
+        System.out.println(resultList);
+        return null;
+    }
 
     /**
      * 계획 생성 서비스 메서드
@@ -62,7 +69,7 @@ public class PlanService {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
         });
 
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(member, team).orElseThrow(() -> {
+        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(member, team).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다.");
         });
 
@@ -71,7 +78,7 @@ public class PlanService {
         }
 
         Plan plan = Plan.builder()
-                .owner(member)
+                .owner(teamMember)
                 .actionCount(0)
                 .currentWeeks(0)
                 .title(dto.getTitle())
@@ -300,7 +307,7 @@ public class PlanService {
             throw new EntityNotFoundException("해당 계획을 찾을 수 없습니다.");
         });
 
-        TeamMember teamMember = teamMemberRepository.findByMemberAndTeam(user, plan.getTeam()).orElseThrow(() -> {
+        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(user, plan.getTeam()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다.");
         });
         Grade grade = teamMember.getGrade();
@@ -308,6 +315,5 @@ public class PlanService {
             throw new AccessDeniedException("해당 계획의 교관이 아닙니다.");
         }
     }
-
 
 }
