@@ -1,30 +1,4 @@
-server:
-  port: 8081
-  servlet:
-    encoding:
-      charset: utf-8
-
 spring:
-  datasource:
-    url: jdbc:mariadb://localhost:3306/stronger
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: thekim12
-    password: 1234
-
-  jpa:
-    open-in-view: true
-    hibernate:
-      ddl-auto: none
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true
-    properties:
-      '[hibernate.format_sql]': true
-
-  output:
-    ansi:
-      enabled: always
-
-logging:
-  level:
-    '[org.springframework.boot.web]': debug
+  profiles:
+    active:
+      - prod
