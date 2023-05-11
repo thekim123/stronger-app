@@ -1,10 +1,13 @@
 package com.stronger.momo.team.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
+import com.stronger.momo.plan.entity.Plan;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -30,9 +33,13 @@ public class TeamMember extends BaseTimeEntity {
     @ManyToOne
     private Team team;
 
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "userId")
     @ManyToOne
-    private User member;
+    private User user;
+
+    @OneToMany(mappedBy = "owner")
+    @Builder.Default
+    private List<Plan> plan = new ArrayList<>();
 
 
     /**
@@ -44,7 +51,7 @@ public class TeamMember extends BaseTimeEntity {
      */
     public void update(User user, Team team, String positionName) {
         this.team = team;
-        this.member = user;
+        this.user = user;
         this.grade = Grade.valueOf(positionName);
     }
 

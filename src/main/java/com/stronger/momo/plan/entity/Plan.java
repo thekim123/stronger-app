@@ -3,6 +3,7 @@ package com.stronger.momo.plan.entity;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.plan.dto.PlanUpdateDto;
 import com.stronger.momo.team.entity.Team;
+import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -49,7 +50,7 @@ public class Plan extends BaseTimeEntity {
 
     @JoinColumn(name = "ownerId")
     @ManyToOne
-    private User owner;
+    private TeamMember owner;
     @JoinColumn(name = "groupId")
     @ManyToOne
     private Team team;

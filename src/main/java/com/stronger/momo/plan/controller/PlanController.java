@@ -20,10 +20,11 @@ public class PlanController {
 
     private final PlanService planService;
 
-//    @GetMapping
-//    public ResponseEntity<?> getPlan(Authentication authentication) {
-//        return ResponseEntity.status(HttpStatus.OK).body(planService.getPlan(authentication));
-//    }
+    @GetMapping("/team")
+    public ResponseEntity<?> getPlan(Authentication authentication) {
+        planService.getPlan(authentication);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 
     /**
      * 계획 작성 api

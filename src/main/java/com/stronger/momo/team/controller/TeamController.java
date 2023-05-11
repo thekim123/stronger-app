@@ -1,7 +1,7 @@
 package com.stronger.momo.team.controller;
 
 import com.stronger.momo.team.dto.TeamDto;
-import com.stronger.momo.team.dto.GradeDto;
+import com.stronger.momo.team.dto.TeamMemberDto;
 import com.stronger.momo.team.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 
 /**
  * 그룹과 관련된 API
@@ -20,6 +21,20 @@ import java.nio.file.AccessDeniedException;
 public class TeamController {
 
     private final TeamService teamService;
+
+    /**
+     * 그룹 생성 API
+     *
+     * @param authentication 로그인 인증 정보
+     * @param teamId         팀 id
+     * @return 그룹 생성 dto
+     */
+    @GetMapping("/owner/{teamId}")
+    public ResponseEntity<?> getTeamMemberList(Authentication authentication, @PathVariable Long teamId) {
+        List<TeamMemberDto> dtoList = teamService.getTeamMemberList(authentication, teamId);
+        System.out.println(dtoList);
+        return ResponseEntity.status(HttpStatus.OK).body(dtoList);
+    }
 
     /**
      * 내 그룹 목록 조회 API
@@ -59,7 +74,7 @@ public class TeamController {
      * 그룹 삭제 API
      *
      * @param authentication 로그인 인증 정보
-     * @param teamId        그룹 id
+     * @param teamId         그룹 id
      * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @DeleteMapping("/delete/{teamId}")
@@ -103,19 +118,19 @@ public class TeamController {
      * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @PutMapping("/position")
-    public ResponseEntity<?> updatePosition(Authentication authentication, @RequestBody GradeDto dto) throws AccessDeniedException {
+    public ResponseEntity<?> updatePosition(Authentication authentication, @RequestBody TeamMemberDto dto) throws AccessDeniedException {
         teamService.updatePosition(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("팀 멤버의 직책을 바꿨습니다.");
     }
 
     @DeleteMapping("/leave")
-    public ResponseEntity<?> leaveGroup(Authentication authentication, @RequestBody GradeDto dto) throws AccessDeniedException {
+    public ResponseEntity<?> leaveGroup(Authentication authentication, @RequestBody TeamMemberDto dto) throws AccessDeniedException {
         teamService.leaveTeam(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("팀 탈퇴가 완료되었습니다.");
     }
 
     @DeleteMapping("/ban")
-    public ResponseEntity<?> banUser(Authentication authentication, @RequestBody GradeDto dto) throws AccessDeniedException {
+    public ResponseEntity<?> banUser(Authentication authentication, @RequestBody TeamMemberDto dto) throws AccessDeniedException {
         teamService.banUser(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("팀 회원 추방이 완료되었습니다.");
     }

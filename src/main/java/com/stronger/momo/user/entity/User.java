@@ -36,7 +36,7 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "owner")
     private List<Team> teamList;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "user")
     private List<TeamMember> teamMemberList;
 
     @OneToMany(mappedBy = "writer")
