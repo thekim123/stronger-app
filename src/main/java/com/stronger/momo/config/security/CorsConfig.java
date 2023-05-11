@@ -19,7 +19,8 @@ public class CorsConfig {
         config.setAllowedHeaders(Arrays.asList("X-Requested-With","Origin","Content-Type","Accept","Authorization"));
         config.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers", "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, " +
                 "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
-        config.addAllowedOrigin("*");
+        config.addAllowedOrigin("http://58.76.177.45:8080");
+        config.addAllowedOrigin("http://localhost:8080");
         config.addAllowedMethod("*");
 
         source.registerCorsConfiguration("/**", config);

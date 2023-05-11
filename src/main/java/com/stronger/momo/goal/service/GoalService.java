@@ -26,7 +26,6 @@ import org.springframework.security.access.AccessDeniedException;
 import javax.persistence.EntityNotFoundException;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -95,6 +94,8 @@ public class GoalService {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .goalCount(dto.getGoalCount())
+                .startDate(dto.getStartDate())
+                .endDate(dto.getEndDate())
                 .team(team)
                 .build();
         goalRepository.save(goal);
@@ -298,6 +299,7 @@ public class GoalService {
             throw new EntityNotFoundException("해당 유저가 없습니다.");
         });
 
+        // TODO : 현재 유저와 계획의 소유자가 같은지 판단하는 로직을 다시 짜야함.
         if (goal.getOwner().equals(currentUser)) {
             return;
         }

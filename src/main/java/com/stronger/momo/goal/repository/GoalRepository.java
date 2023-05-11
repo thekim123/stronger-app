@@ -14,6 +14,6 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     @Query("SELECT g FROM Goal g WHERE g.owner= :owner AND g.startDate <= :today AND g.endDate >= :today")
     List<Goal> mFindTodoList(User owner, @Param("today") LocalDate today);
 
-    @Query("SELECT g FROM Goal g WHERE :now BETWEEN g.startDate AND g.endDate AND g.owner= :user")
+    @Query("SELECT g FROM Goal g WHERE g.owner= :user AND :now BETWEEN g.startDate AND g.endDate  ")
     List<Goal> mfindByOwnerAndDate(TeamMember user, LocalDate now);
 }
