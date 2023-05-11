@@ -1,10 +1,8 @@
-package com.stronger.momo.plan.controller;
+package com.stronger.momo.goal.controller;
 
-import com.stronger.momo.plan.dto.FeedbackDto;
-import com.stronger.momo.plan.dto.PlanCreateDto;
-import com.stronger.momo.plan.dto.PlanUpdateDto;
-import com.stronger.momo.plan.dto.SelfFeedbackDto;
-import com.stronger.momo.plan.service.PlanService;
+import com.stronger.momo.goal.dto.*;
+import com.stronger.momo.goal.entity.Goal;
+import com.stronger.momo.goal.service.GoalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,69 +10,74 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 
+//TODO 주소 전부다 goal 로 바꾸기.
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/plan")
-public class PlanController {
+public class GoalController {
 
-    private final PlanService planService;
+    private final GoalService goalService;
 
-    @GetMapping("/team")
-    public ResponseEntity<?> getPlan(Authentication authentication) {
-        planService.getPlan(authentication);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+    /**
+     * @param authentication 유저 인증 정보
+     * @param teamId         팀 id
+     * @return 해당 팀에서 세운 목표 리스트
+     * @apiNote 팀에서 세운 목표 조회 api
+     */
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<?> findGoalByTeam(Authentication authentication, @PathVariable Long teamId) {
+        List<GoalDto> goalList = goalService.findGoalByTeam(authentication, teamId);
+        System.out.println(goalList);
+        return ResponseEntity.status(HttpStatus.OK).body(goalList);
     }
 
     /**
-     * 계획 작성 api
-     *
      * @param authentication 유저 인증 정보
      * @param dto            계획 작성 dto
+     * @apiNote 작성 api
      */
     @PostMapping
-    public ResponseEntity<?> createPlan(Authentication authentication, @RequestBody PlanCreateDto dto) {
-        planService.createPlan(authentication, dto);
+    public ResponseEntity<?> createPlan(Authentication authentication, @RequestBody GoalCreateDto dto) {
+        goalService.createPlan(authentication, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body("계획 수립이 완료되었습니다.");
     }
 
 
     /**
-     * 계획 삭제 api
-     *
      * @param authentication 유저 인증 정보
      * @param planId         계획 id
      * @throws AccessDeniedException 계획의 소유자가 아닌 경우
+     * @apiNote 삭제 api
      */
     @DeleteMapping("/{planId}")
     public ResponseEntity<?> deletePlan(Authentication authentication, @PathVariable Long planId) throws AccessDeniedException {
-        planService.deletePlan(authentication, planId);
+        goalService.deletePlan(authentication, planId);
         return ResponseEntity.status(HttpStatus.OK).body("계획 삭제가 완료되었습니다.");
     }
 
 
     /**
-     * 계획 수정 api
-     *
      * @param authentication 유저 인증 정보
      * @param dto            계획 수정 dto
+     * @apiNote 수정 api
      */
     @PutMapping
-    public ResponseEntity<?> updatePlan(Authentication authentication, @RequestBody PlanUpdateDto dto) throws AccessDeniedException {
-        planService.updatePlan(authentication, dto);
+    public ResponseEntity<?> updatePlan(Authentication authentication, @RequestBody GoalUpdateDto dto) throws AccessDeniedException {
+        goalService.updatePlan(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("계획 수정이 완료되었습니다");
     }
 
     /**
-     * 오늘의 계획 완수 api
-     *
      * @param authentication 유저 인증 정보
      * @param planId         계획 id
      * @throws AccessDeniedException 계획 소유자가 아닌 경우
+     * @apiNote 오늘의 계획 완수 api
      */
     @PutMapping("/{planId}/daily")
     public ResponseEntity<?> dailyCheck(Authentication authentication, @PathVariable Long planId) throws AccessDeniedException {
-        planService.dailyCheck(authentication, planId);
+        goalService.dailyCheck(authentication, planId);
         return ResponseEntity.status(HttpStatus.OK).body("계획 완수 체크가 완료되었습니다.");
     }
 
@@ -87,7 +90,7 @@ public class PlanController {
      */
     @PostMapping("/{planId}/feedback")
     public ResponseEntity<?> createFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long planId) {
-        planService.createFeedback(authentication, dto, planId);
+        goalService.createFeedback(authentication, dto, planId);
         return ResponseEntity.status(HttpStatus.CREATED).body("교관 피드백 작성이 완료되었습니다.");
     }
 
@@ -101,7 +104,7 @@ public class PlanController {
      */
     @DeleteMapping("/{planId}/feedback/{feedbackId}")
     public ResponseEntity<?> deleteFeedback(Authentication authentication, @PathVariable Long feedbackId, @PathVariable Long planId) throws AccessDeniedException {
-        planService.deleteFeedback(authentication, feedbackId, planId);
+        goalService.deleteFeedback(authentication, feedbackId, planId);
         return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 삭제가 완료되었습니다");
     }
 
@@ -115,7 +118,7 @@ public class PlanController {
      */
     @PutMapping("/{planId}/feedback")
     public ResponseEntity<?> updateFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long planId) throws AccessDeniedException {
-        planService.updateFeedback(authentication, dto, planId);
+        goalService.updateFeedback(authentication, dto, planId);
         return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 수정이 완료되었습니다.");
     }
 
@@ -127,7 +130,7 @@ public class PlanController {
      */
     @PostMapping("/{planId}/self")
     public ResponseEntity<?> createSelfFeedback(@RequestBody SelfFeedbackDto dto, @PathVariable Long planId) {
-        planService.createSelfFeedback(dto, planId);
+        goalService.createSelfFeedback(dto, planId);
         return ResponseEntity.status(HttpStatus.CREATED).body("셀프 피드백 작성이 완료되었습니다.");
     }
 
@@ -141,7 +144,7 @@ public class PlanController {
      */
     @DeleteMapping("/{planId}/self/{selfId}")
     public ResponseEntity<?> deleteSelfFeedback(Authentication authentication, @PathVariable Long selfId, @PathVariable Long planId) throws AccessDeniedException {
-        planService.deleteSelfFeedback(authentication, selfId, planId);
+        goalService.deleteSelfFeedback(authentication, selfId, planId);
         return ResponseEntity.status(HttpStatus.OK).body("셀프 피드백 삭제가 완료되었습니다");
     }
 
@@ -155,7 +158,7 @@ public class PlanController {
      */
     @PutMapping("/{planId}/self")
     public ResponseEntity<?> updateSelfFeedback(Authentication authentication, @RequestBody SelfFeedbackDto dto, @PathVariable Long planId) throws AccessDeniedException {
-        planService.updateSelfFeedback(authentication, dto, planId);
+        goalService.updateSelfFeedback(authentication, dto, planId);
         return ResponseEntity.status(HttpStatus.OK).body("셀프 피드백 수정이 완료되었습니다.");
     }
 }

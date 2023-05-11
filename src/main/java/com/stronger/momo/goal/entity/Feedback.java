@@ -1,12 +1,11 @@
-package com.stronger.momo.plan.entity;
+package com.stronger.momo.goal.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.plan.dto.FeedbackDto;
+import com.stronger.momo.goal.dto.FeedbackDto;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 선생님 피드백 Entity
@@ -28,9 +27,9 @@ public class Feedback extends BaseTimeEntity {
     @ManyToOne
     private User user;
 
-    @JoinColumn(name = "planId")
+    @JoinColumn(name = "goalId")
     @ManyToOne
-    private Plan plan;
+    private Goal goal;
 
     private String comment;
 

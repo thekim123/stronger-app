@@ -1,7 +1,7 @@
 package com.stronger.momo.team.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.plan.entity.Plan;
+import com.stronger.momo.goal.entity.Goal;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
@@ -39,7 +39,7 @@ public class TeamMember extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "owner")
     @Builder.Default
-    private List<Plan> plan = new ArrayList<>();
+    private List<Goal> goal = new ArrayList<>();
 
 
     /**

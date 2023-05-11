@@ -1,5 +1,6 @@
 package com.stronger.momo.team.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.team.dto.TeamDto;
 import com.stronger.momo.user.entity.User;
@@ -27,12 +28,14 @@ public class Team extends BaseTimeEntity {
 
     private String description;
 
+    @JsonIgnoreProperties({"teamList", "teamMemberList", "snsList"})
     @JoinColumn(name = "ownerId")
     @ManyToOne
     private User owner;
 
     private boolean isOpen;
 
+    @JsonIgnoreProperties({"team", "user"})
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     @Builder.Default
     private List<TeamMember> teamMemberList = new ArrayList<>();

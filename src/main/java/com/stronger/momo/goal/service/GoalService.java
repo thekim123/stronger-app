@@ -1,15 +1,15 @@
-package com.stronger.momo.plan.service;
+package com.stronger.momo.goal.service;
 
 import com.stronger.momo.config.security.PrincipalDetails;
-import com.stronger.momo.plan.dto.*;
-import com.stronger.momo.plan.entity.DailyCheck;
-import com.stronger.momo.plan.entity.Feedback;
-import com.stronger.momo.plan.entity.Plan;
-import com.stronger.momo.plan.entity.SelfFeedback;
-import com.stronger.momo.plan.repository.DailyCheckRepository;
-import com.stronger.momo.plan.repository.FeedbackRepository;
-import com.stronger.momo.plan.repository.PlanRepository;
-import com.stronger.momo.plan.repository.SelfFeedbackRepository;
+import com.stronger.momo.goal.dto.*;
+import com.stronger.momo.goal.entity.DailyCheck;
+import com.stronger.momo.goal.entity.Feedback;
+import com.stronger.momo.goal.entity.Goal;
+import com.stronger.momo.goal.entity.SelfFeedback;
+import com.stronger.momo.goal.repository.DailyCheckRepository;
+import com.stronger.momo.goal.repository.FeedbackRepository;
+import com.stronger.momo.goal.repository.GoalRepository;
+import com.stronger.momo.goal.repository.SelfFeedbackRepository;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.team.entity.Grade;
@@ -29,12 +29,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PlanService {
+public class GoalService {
 
-    private final PlanRepository planRepository;
+    private final GoalRepository goalRepository;
     private final DailyCheckRepository dailyCheckRepository;
     private final SelfFeedbackRepository selfFeedbackRepository;
     private final FeedbackRepository feedbackRepository;
@@ -43,18 +44,28 @@ public class PlanService {
     private final TeamRepository teamRepository;
 
 
+    /**
+     * @param authentication 유저 인증 정보
+     * @param teamId         팀 id
+     * @return 팀원 목표 조회 dto
+     * @apiNote 해당 팀원의 목표 조회 서비스 메서드
+     */
     @Transactional(readOnly = true)
-    public List<PlanDto> getPlan(Authentication authentication) {
+    public List<GoalDto> findGoalByTeam(Authentication authentication, Long teamId) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        List<TeamMember> teamMemberList = teamMemberRepository.findByUser(user);
-        List<Plan> resultList = new ArrayList<>();
-        teamMemberList.forEach(teamMember -> {
-            List<Plan> plan = planRepository.mfindByOwnerAndDate(teamMember, LocalDate.now());
-            resultList.addAll(plan);
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
         });
-        System.out.println(resultList);
-        return null;
+        System.out.println(team.getGroupName());
+        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(user, team).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다");
+        });
+        System.out.println(teamMember.getUser().getUsername());
+        List<Goal> goalList = goalRepository.mfindByOwnerAndDate(teamMember, LocalDate.now());
+        System.out.println(goalList.size());
+        return goalList.stream().map(GoalDto::fromGoal).collect(Collectors.toList());
     }
+
 
     /**
      * 계획 생성 서비스 메서드
@@ -63,7 +74,7 @@ public class PlanService {
      * @param dto            계획 작성 dto
      */
     @Transactional
-    public void createPlan(Authentication authentication, PlanCreateDto dto) {
+    public void createPlan(Authentication authentication, GoalCreateDto dto) {
         User member = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
@@ -77,7 +88,7 @@ public class PlanService {
             throw new AccessDeniedException("대기자는 계획을 작성할 수 없습니다");
         }
 
-        Plan plan = Plan.builder()
+        Goal goal = Goal.builder()
                 .owner(teamMember)
                 .actionCount(0)
                 .currentWeeks(0)
@@ -86,7 +97,7 @@ public class PlanService {
                 .goalCount(dto.getGoalCount())
                 .team(team)
                 .build();
-        planRepository.save(plan);
+        goalRepository.save(goal);
     }
 
 
@@ -101,7 +112,7 @@ public class PlanService {
     public void deletePlan(Authentication authentication, Long planId) throws AccessDeniedException {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         isPlanOwner(planId, owner.getId());
-        planRepository.deleteById(planId);
+        goalRepository.deleteById(planId);
     }
 
 
@@ -113,10 +124,10 @@ public class PlanService {
      * @throws AccessDeniedException 계획의 소유자가 아닌 경우
      */
     @Transactional
-    public void updatePlan(Authentication authentication, PlanUpdateDto dto) throws AccessDeniedException {
+    public void updatePlan(Authentication authentication, GoalUpdateDto dto) throws AccessDeniedException {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         isPlanOwner(dto.getId(), owner.getId());
-        Plan entity = planRepository.findById(dto.getId()).orElseThrow(() -> {
+        Goal entity = goalRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("계획이 존재하지 않습니다.");
         });
 
@@ -136,23 +147,23 @@ public class PlanService {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         isPlanOwner(planId, owner.getId());
 
-        Plan plan = planRepository.findById(planId).orElseThrow(() -> {
+        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
         LocalDate checkDate = LocalDate.now();
-        if (dailyCheckRepository.findByPlanAndCheckDate(plan, checkDate).isPresent()) {
+        if (dailyCheckRepository.findByGoalAndCheckDate(goal, checkDate).isPresent()) {
             throw new AccessDeniedException("오늘은 이미 완수했어요!!");
         }
 
         DailyCheck dailyCheck = DailyCheck.builder()
-                .weeks(plan.getCurrentWeeks())
+                .weeks(goal.getCurrentWeeks())
                 .checkDate(checkDate)
                 .isCompleted(true)
-                .plan(plan)
+                .goal(goal)
                 .build();
 
-        plan.setActionCount(plan.getActionCount() + 1);
+        goal.setActionCount(goal.getActionCount() + 1);
         dailyCheckRepository.save(dailyCheck);
     }
 
@@ -167,13 +178,13 @@ public class PlanService {
     public void createFeedback(Authentication authentication, FeedbackDto dto, Long planId) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
 
-        Plan plan = planRepository.findById(planId).orElseThrow(() -> {
+        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
         isPlanInstructor(authentication, planId);
 
         Feedback feedback = Feedback.builder()
-                .plan(plan)
+                .goal(goal)
                 .user(user)
                 .comment(dto.getComment())
                 .build();
@@ -221,14 +232,14 @@ public class PlanService {
      */
     @Transactional
     public void createSelfFeedback(SelfFeedbackDto dto, Long planId) {
-        Plan plan = planRepository.findById(planId).orElseThrow(() -> {
+        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
         SelfFeedback selfFeedback = SelfFeedback.builder()
                 .reason(dto.getReason())
                 .measure(dto.getMeasure())
-                .plan(plan)
+                .goal(goal)
                 .build();
         selfFeedbackRepository.save(selfFeedback);
     }
@@ -279,7 +290,7 @@ public class PlanService {
      * @throws EntityNotFoundException 엔티티가 존재하지 않는 경우
      */
     public void isPlanOwner(Long planId, Long ownerId) throws AccessDeniedException {
-        Plan plan = planRepository.findById(planId).orElseThrow(() -> {
+        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
@@ -287,7 +298,7 @@ public class PlanService {
             throw new EntityNotFoundException("해당 유저가 없습니다.");
         });
 
-        if (plan.getOwner().equals(currentUser)) {
+        if (goal.getOwner().equals(currentUser)) {
             return;
         }
         throw new AccessDeniedException("당신의 계획이 아닙니다.");
@@ -303,11 +314,11 @@ public class PlanService {
      */
     private void isPlanInstructor(Authentication authentication, Long planId) throws AccessDeniedException {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        Plan plan = planRepository.findById(planId).orElseThrow(() -> {
+        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획을 찾을 수 없습니다.");
         });
 
-        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(user, plan.getTeam()).orElseThrow(() -> {
+        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(user, goal.getTeam()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다.");
         });
         Grade grade = teamMember.getGrade();

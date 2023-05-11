@@ -1,4 +1,4 @@
-package com.stronger.momo.plan.entity;
+package com.stronger.momo.goal.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
 import lombok.*;
@@ -25,9 +25,9 @@ public class DailyCheck extends BaseTimeEntity {
     @Builder.Default
     private boolean isCompleted = true;
 
-    @JoinColumn(name = "planId")
+    @JoinColumn(name = "goalId")
     @ManyToOne
-    private Plan plan;
+    private Goal goal;
 
 
 }

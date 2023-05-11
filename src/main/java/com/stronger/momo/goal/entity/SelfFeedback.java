@@ -1,11 +1,10 @@
-package com.stronger.momo.plan.entity;
+package com.stronger.momo.goal.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.plan.dto.SelfFeedbackDto;
+import com.stronger.momo.goal.dto.SelfFeedbackDto;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 자가피드백 Entity
@@ -23,9 +22,9 @@ public class SelfFeedback extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "planId")
+    @JoinColumn(name = "goalId")
     @ManyToOne
-    private Plan plan;
+    private Goal goal;
 
     // 실패 이유
     private String reason;

@@ -1,18 +1,15 @@
-package com.stronger.momo.plan.dto;
+package com.stronger.momo.goal.dto;
 
-import com.stronger.momo.plan.entity.Plan;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PlanUpdateDto {
+public class GoalUpdateDto {
     private Long id;
     private String title;
     private String content;

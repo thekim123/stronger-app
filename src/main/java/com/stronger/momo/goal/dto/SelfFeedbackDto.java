@@ -1,12 +1,9 @@
-package com.stronger.momo.plan.dto;
+package com.stronger.momo.goal.dto;
 
-import com.stronger.momo.plan.entity.SelfFeedback;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 
 @Data
 @Builder
