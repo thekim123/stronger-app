@@ -7,7 +7,6 @@ import com.stronger.momo.team.entity.TeamMember;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,10 +39,8 @@ public class Goal extends BaseTimeEntity {
     @Column
     private Integer actionCount;
 
+    //TODO: 지워도될듯?
     private Integer currentWeeks;
-
-    private LocalDate startDate;
-    private LocalDate endDate;
 
     @JoinColumn(name = "ownerId")
     @ManyToOne

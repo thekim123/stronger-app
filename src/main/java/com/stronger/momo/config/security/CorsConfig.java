@@ -23,7 +23,6 @@ public class CorsConfig {
         config.addAllowedOrigin("http://58.76.177.45:8080");
         config.addAllowedOrigin("http://1.235.152.163:8080");
         config.addAllowedMethod("*");
-
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }

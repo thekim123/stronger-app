@@ -7,6 +7,7 @@ import com.stronger.momo.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,13 +28,15 @@ public class Team extends BaseTimeEntity {
     private String groupName;
 
     private String description;
+    private boolean isOpen;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @JsonIgnoreProperties({"teamList", "teamMemberList", "snsList"})
     @JoinColumn(name = "ownerId")
     @ManyToOne
     private User owner;
 
-    private boolean isOpen;
 
     @JsonIgnoreProperties({"team", "user"})
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)

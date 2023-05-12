@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +46,29 @@ public class GoalService {
 
     /**
      * @param authentication 유저 인증 정보
+     * @return 자신이 하는 모든 todo목록
+     * @apiNote 자신이 하는 모든 todo를 가져오는 메서드
+     * 로그인 유저 -> 로그인 유저 = 팀 멤버 -> 팀멤버로 가지고 있는 모든 goal
+     */
+    @Transactional(readOnly = true)
+    public List<GoalDto> getTodoList(Authentication authentication) {
+        User loginUser = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        return getGoalsForUser(loginUser);
+    }
+
+    public List<GoalDto> getGoalsForUser(User user) {
+        return teamMemberRepository.findByUser(user).stream()
+                .flatMap(this::getGoalDtoList)
+                .collect(Collectors.toList());
+    }
+
+    public Stream<GoalDto> getGoalDtoList(TeamMember teamMember) {
+        return goalRepository.findByOwner(teamMember).stream()
+                .map(GoalDto::fromGoal);
+    }
+
+    /**
+     * @param authentication 유저 인증 정보
      * @param teamId         팀 id
      * @return 팀원 목표 조회 dto
      * @apiNote 해당 팀원의 목표 조회 서비스 메서드
@@ -55,13 +79,12 @@ public class GoalService {
         Team team = teamRepository.findById(teamId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
         });
-        System.out.println(team.getGroupName());
+
         TeamMember teamMember = teamMemberRepository.findByUserAndTeam(user, team).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다");
         });
-        System.out.println(teamMember.getUser().getUsername());
-        List<Goal> goalList = goalRepository.mfindByOwnerAndDate(teamMember, LocalDate.now());
-        System.out.println(goalList.size());
+
+        List<Goal> goalList = goalRepository.findByOwner(teamMember);
         return goalList.stream().map(GoalDto::fromGoal).collect(Collectors.toList());
     }
 
@@ -73,7 +96,7 @@ public class GoalService {
      * @param dto            계획 작성 dto
      */
     @Transactional
-    public void createPlan(Authentication authentication, GoalCreateDto dto) {
+    public GoalDto createGoal(Authentication authentication, GoalCreateDto dto) {
         User member = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
@@ -94,11 +117,11 @@ public class GoalService {
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .goalCount(dto.getGoalCount())
-                .startDate(dto.getStartDate())
-                .endDate(dto.getEndDate())
                 .team(team)
                 .build();
-        goalRepository.save(goal);
+
+        Goal insertedGoal = goalRepository.save(goal);
+        return GoalDto.fromGoal(insertedGoal);
     }
 
 
@@ -106,14 +129,14 @@ public class GoalService {
      * 계획 삭제 서비스 메서드
      *
      * @param authentication 유저 인증 정보
-     * @param planId         계획 작성 dto
+     * @param goalId         계획 작성 dto
      * @throws AccessDeniedException 계획의 소유자가 아닌 경우
      */
     @Transactional
-    public void deletePlan(Authentication authentication, Long planId) throws AccessDeniedException {
+    public void deleteGoal(Authentication authentication, Long goalId) throws AccessDeniedException {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        isPlanOwner(planId, owner.getId());
-        goalRepository.deleteById(planId);
+        isGoalOwner(goalId, owner.getId());
+        goalRepository.deleteById(goalId);
     }
 
 
@@ -125,9 +148,11 @@ public class GoalService {
      * @throws AccessDeniedException 계획의 소유자가 아닌 경우
      */
     @Transactional
-    public void updatePlan(Authentication authentication, GoalUpdateDto dto) throws AccessDeniedException {
+    public void updateGoal(Authentication authentication, GoalUpdateDto dto) throws AccessDeniedException {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        isPlanOwner(dto.getId(), owner.getId());
+        if (dto.getId() != null) {
+            isGoalOwner(dto.getId(), owner.getId());
+        }
         Goal entity = goalRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("계획이 존재하지 않습니다.");
         });
@@ -140,23 +165,24 @@ public class GoalService {
      * 오늘의 계획 완수 서비스 메서드
      *
      * @param authentication 유저 인증 정보
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @throws AccessDeniedException 계획의 소유자가 아닌 경우, 이미 계획 완수를 누른 경우
      */
     @Transactional
-    public void dailyCheck(Authentication authentication, Long planId) throws AccessDeniedException {
-        User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        isPlanOwner(planId, owner.getId());
+    public void dailyCheck(Authentication authentication, Long goalId) throws AccessDeniedException {
+        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        isGoalOwner(goalId, user.getId());
 
-        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
+        // TODO: isGoalOwner 에서 goal을 가져오는데, 다시 가져오는 것은 비효율적이다. 수정 필요
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
-        LocalDate checkDate = LocalDate.now();
-        if (dailyCheckRepository.findByGoalAndCheckDate(goal, checkDate).isPresent()) {
-            throw new AccessDeniedException("오늘은 이미 완수했어요!!");
+        if (dailyCheckRepository.findByGoalAndCheckDate(goal, LocalDate.now()).isPresent()) {
+            throw new EntityNotFoundException("이미 오늘의 계획 완수를 누르셨습니다.");
         }
 
+        LocalDate checkDate = LocalDate.now();
         DailyCheck dailyCheck = DailyCheck.builder()
                 .weeks(goal.getCurrentWeeks())
                 .checkDate(checkDate)
@@ -164,8 +190,24 @@ public class GoalService {
                 .goal(goal)
                 .build();
 
-        goal.setActionCount(goal.getActionCount() + 1);
         dailyCheckRepository.save(dailyCheck);
+    }
+
+    @Transactional
+    public void unDailyCheck(Authentication authentication, Long goalId) throws AccessDeniedException {
+        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        isGoalOwner(goalId, user.getId());
+
+        // TODO: isGoalOwner 에서 goal을 가져오는데, 다시 가져오는 것은 비효율적이다. 수정 필요
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
+        });
+
+        dailyCheckRepository.findByGoalAndCheckDate(goal, LocalDate.now()).ifPresentOrElse(
+                dailyCheckRepository::delete, () -> {
+                    throw new EntityNotFoundException("오늘의 계획 완수를 누른 적이 없습니다.");
+                }
+        );
     }
 
 
@@ -173,16 +215,16 @@ public class GoalService {
      * 교관 피드백 작성 서비스 메서드
      *
      * @param dto    교관 피드백 작성 dto
-     * @param planId 계획 id
+     * @param goalId 계획 id
      */
     @Transactional
-    public void createFeedback(Authentication authentication, FeedbackDto dto, Long planId) {
+    public void createFeedback(Authentication authentication, FeedbackDto dto, Long goalId) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
 
-        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
-        isPlanInstructor(authentication, planId);
+        isGoalInstructor(authentication, goalId);
 
         Feedback feedback = Feedback.builder()
                 .goal(goal)
@@ -197,12 +239,12 @@ public class GoalService {
      *
      * @param authentication 유저 인증 정보
      * @param feedbackId     교관 피드백 id
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @throws AccessDeniedException 셀프 피드백의 소유자가 아닌 경우
      */
     @Transactional
-    public void deleteFeedback(Authentication authentication, Long feedbackId, Long planId) throws AccessDeniedException {
-        isPlanInstructor(authentication, planId);
+    public void deleteFeedback(Authentication authentication, Long feedbackId, Long goalId) throws AccessDeniedException {
+        isGoalInstructor(authentication, goalId);
         feedbackRepository.deleteById(feedbackId);
     }
 
@@ -212,12 +254,12 @@ public class GoalService {
      *
      * @param authentication 유저 인증 정보
      * @param dto            교관 피드백 dto
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @throws AccessDeniedException 교관 피드백의 소유자가 아닌 경우
      */
     @Transactional
-    public void updateFeedback(Authentication authentication, FeedbackDto dto, Long planId) throws AccessDeniedException {
-        isPlanInstructor(authentication, planId);
+    public void updateFeedback(Authentication authentication, FeedbackDto dto, Long goalId) throws AccessDeniedException {
+        isGoalInstructor(authentication, goalId);
         Feedback entity = feedbackRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 교관 피드백이 존재하지 않습니다");
         });
@@ -229,11 +271,11 @@ public class GoalService {
      * 셀프 피드백 작성 서비스 메서드
      *
      * @param dto    셀프피드백 작성 dto
-     * @param planId 계획 id
+     * @param goalId 계획 id
      */
     @Transactional
-    public void createSelfFeedback(SelfFeedbackDto dto, Long planId) {
-        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
+    public void createSelfFeedback(SelfFeedbackDto dto, Long goalId) {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
@@ -251,13 +293,13 @@ public class GoalService {
      *
      * @param authentication 유저 인증 정보
      * @param selfId         셀프 피드백 id
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @throws AccessDeniedException 셀프 피드백의 소유자가 아닌 경우
      */
     @Transactional
-    public void deleteSelfFeedback(Authentication authentication, Long selfId, Long planId) throws AccessDeniedException {
+    public void deleteSelfFeedback(Authentication authentication, Long selfId, Long goalId) throws AccessDeniedException {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        isPlanOwner(planId, user.getId());
+        isGoalOwner(goalId, user.getId());
         selfFeedbackRepository.deleteById(selfId);
     }
 
@@ -267,13 +309,13 @@ public class GoalService {
      *
      * @param authentication 유저 인증 정보
      * @param dto            셀프 피드백 dto
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @throws AccessDeniedException 셀프 피드백의 소유자가 아닌 경우
      */
     @Transactional
-    public void updateSelfFeedback(Authentication authentication, SelfFeedbackDto dto, Long planId) throws AccessDeniedException {
+    public void updateSelfFeedback(Authentication authentication, SelfFeedbackDto dto, Long goalId) throws AccessDeniedException {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        isPlanOwner(planId, user.getId());
+        isGoalOwner(goalId, user.getId());
         SelfFeedback entity = selfFeedbackRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 셀프 피드백이 존재하지 않습니다");
         });
@@ -285,25 +327,24 @@ public class GoalService {
     /**
      * 계획의 소유자인지 판정하는 메서드
      *
-     * @param planId  계획 글의 id
+     * @param goalId  계획 글의 id
      * @param ownerId 게획 소유자의 id
      * @throws AccessDeniedException   계획의 소유자가 아닌 경우
      * @throws EntityNotFoundException 엔티티가 존재하지 않는 경우
      */
-    public void isPlanOwner(Long planId, Long ownerId) throws AccessDeniedException {
-        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
+    public void isGoalOwner(Long goalId, Long ownerId) throws AccessDeniedException {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
+        User ownerUser = goal.getOwner().getUser();
         User currentUser = userRepository.findById(ownerId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 유저가 없습니다.");
         });
 
-        // TODO : 현재 유저와 계획의 소유자가 같은지 판단하는 로직을 다시 짜야함.
-        if (goal.getOwner().equals(currentUser)) {
-            return;
+        if (!ownerUser.getUsername().equals(currentUser.getUsername())) {
+            throw new AccessDeniedException("당신의 계획이 아닙니다.");
         }
-        throw new AccessDeniedException("당신의 계획이 아닙니다.");
     }
 
 
@@ -311,12 +352,12 @@ public class GoalService {
      * 계획의 교관인지 판정하는 메서드
      *
      * @param authentication 유저(교관) 인증 정보
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @throws AccessDeniedException 계획의 교관이 아닌 경우
      */
-    private void isPlanInstructor(Authentication authentication, Long planId) throws AccessDeniedException {
+    private void isGoalInstructor(Authentication authentication, Long goalId) throws AccessDeniedException {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        Goal goal = goalRepository.findById(planId).orElseThrow(() -> {
+        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획을 찾을 수 없습니다.");
         });
 

@@ -65,7 +65,7 @@ public class TeamController {
      */
     @PostMapping("/create")
     public ResponseEntity<?> createGroup(Authentication authentication, @RequestBody TeamDto teamDto) {
-        teamService.createGroup(authentication, teamDto);
+        teamService.createTeam(authentication, teamDto);
         return ResponseEntity.status(HttpStatus.CREATED).body("팀 생성이 완료되었습니다.");
     }
 

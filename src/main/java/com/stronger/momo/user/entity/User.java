@@ -1,5 +1,6 @@
 package com.stronger.momo.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
@@ -23,8 +24,11 @@ public class User extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
+
+    @Column(unique = true, nullable = false)
+    private String nickname;
 
     private String password;
 

@@ -56,10 +56,11 @@ public class TeamService {
     }
 
     /**
-     * 내 그룹 목록 조회 서비스 로직
+     * TODO 시작날짜와 종료날짜에 관해서 유효성 검사 해야함. 예를 들어 종료날짜가 시작날짜 이전 이라던가, 오늘보다 날짜가 이전이라던가
      *
      * @param authentication 로그인 인증 정보
      * @return 내 그룹 목록 dto
+     * @apiNote 내 그룹 목록 조회 서비스 로직
      */
     @Transactional(readOnly = true)
     public List<TeamDto> getMyTeamList(Authentication authentication) {
@@ -102,13 +103,15 @@ public class TeamService {
      * @param teamDto        그룹 생성 dto
      */
     @Transactional
-    public void createGroup(Authentication authentication, TeamDto teamDto) {
+    public void createTeam(Authentication authentication, TeamDto teamDto) {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = Team.builder()
                 .groupName(teamDto.getTeamName())
                 .description(teamDto.getDescription())
                 .owner(owner)
                 .isOpen(teamDto.isOpen())
+                .startDate(teamDto.getStartDate())
+                .endDate(teamDto.getEndDate())
                 .build();
 
         TeamMember teamMember = TeamMember.builder()
@@ -192,11 +195,11 @@ public class TeamService {
 
 
     /**
-     * 팀 직책 변경 서비스 로직
-     *
+     * TODO : JPQL로 변경해야함 조회만 3번함
      * @param authentication 로그인 인증 정보
      * @param dto            직책 변경 dto
      * @throws AccessDeniedException 그룹장이 아닌 경우 거절
+     * @apiNote 팀 직책 변경 서비스 로직
      */
     @Transactional
     public void updatePosition(Authentication authentication, TeamMemberDto dto) throws AccessDeniedException {

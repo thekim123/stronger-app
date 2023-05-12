@@ -15,8 +15,7 @@ public class GoalDto {
     private Integer goalCount;
     private Integer actionCount;
     private Integer currentWeeks;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Long teamId;
 
     public static GoalDto fromGoal(Goal goal) {
         return GoalDto.builder()
@@ -26,8 +25,6 @@ public class GoalDto {
                 .goalCount(goal.getGoalCount())
                 .actionCount(goal.getActionCount())
                 .currentWeeks(goal.getCurrentWeeks())
-                .startDate(goal.getStartDate())
-                .endDate(goal.getEndDate())
                 .build();
     }
 }

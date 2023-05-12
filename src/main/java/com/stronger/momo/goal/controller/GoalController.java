@@ -10,13 +10,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//TODO 주소 전부다 goal 로 바꾸기.
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/plan")
+@RequestMapping("/goal")
 public class GoalController {
 
     private final GoalService goalService;
+
+
+    @GetMapping("/todo-list")
+    public ResponseEntity<?> getTodoList(Authentication authentication) {
+        List<GoalDto> todoList = goalService.getTodoList(authentication);
+        return ResponseEntity.status(HttpStatus.OK).body(todoList);
+    }
 
     /**
      * @param authentication 유저 인증 정보
@@ -36,20 +42,20 @@ public class GoalController {
      * @apiNote 작성 api
      */
     @PostMapping
-    public ResponseEntity<?> createPlan(Authentication authentication, @RequestBody GoalCreateDto dto) {
-        goalService.createPlan(authentication, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("계획 수립이 완료되었습니다.");
+    public ResponseEntity<?> createGoal(Authentication authentication, @RequestBody GoalCreateDto dto) {
+        GoalDto data = goalService.createGoal(authentication, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(data);
     }
 
 
     /**
      * @param authentication 유저 인증 정보
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @apiNote 삭제 api
      */
-    @DeleteMapping("/{planId}")
-    public ResponseEntity<?> deletePlan(Authentication authentication, @PathVariable Long planId) {
-        goalService.deletePlan(authentication, planId);
+    @DeleteMapping("/{goalId}")
+    public ResponseEntity<?> deleteGoal(Authentication authentication, @PathVariable Long goalId) {
+        goalService.deleteGoal(authentication, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("계획 삭제가 완료되었습니다.");
     }
 
@@ -60,19 +66,25 @@ public class GoalController {
      * @apiNote 수정 api
      */
     @PutMapping
-    public ResponseEntity<?> updatePlan(Authentication authentication, @RequestBody GoalUpdateDto dto)  {
-        goalService.updatePlan(authentication, dto);
+    public ResponseEntity<?> updateGoal(Authentication authentication, @RequestBody GoalUpdateDto dto) {
+        goalService.updateGoal(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("계획 수정이 완료되었습니다");
     }
 
     /**
      * @param authentication 유저 인증 정보
-     * @param planId         계획 id
+     * @param goalId         계획 id
      * @apiNote 오늘의 계획 완수 api
      */
-    @PutMapping("/{planId}/daily")
-    public ResponseEntity<?> dailyCheck(Authentication authentication, @PathVariable Long planId)   {
-        goalService.dailyCheck(authentication, planId);
+    @PostMapping("/{goalId}/daily")
+    public ResponseEntity<?> dailyCheck(Authentication authentication, @PathVariable Long goalId) {
+        goalService.dailyCheck(authentication, goalId);
+        return ResponseEntity.status(HttpStatus.OK).body("계획 완수 체크가 완료되었습니다.");
+    }
+
+    @DeleteMapping("/{goalId}/daily")
+    public ResponseEntity<?> unDailyCheck(Authentication authentication, @PathVariable Long goalId) {
+        goalService.unDailyCheck(authentication, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("계획 완수 체크가 완료되었습니다.");
     }
 
@@ -81,11 +93,11 @@ public class GoalController {
      * 교관 피드백 작성 api
      *
      * @param dto    교관 피드백 작성 dto
-     * @param planId 계획 id
+     * @param goalId 계획 id
      */
-    @PostMapping("/{planId}/feedback")
-    public ResponseEntity<?> createFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long planId) {
-        goalService.createFeedback(authentication, dto, planId);
+    @PostMapping("/{goalId}/feedback")
+    public ResponseEntity<?> createFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long goalId) {
+        goalService.createFeedback(authentication, dto, goalId);
         return ResponseEntity.status(HttpStatus.CREATED).body("교관 피드백 작성이 완료되었습니다.");
     }
 
@@ -94,11 +106,11 @@ public class GoalController {
      *
      * @param authentication 유저 인증 정보
      * @param feedbackId     교관 피드백 id
-     * @param planId         계획 id
+     * @param goalId         계획 id
      */
-    @DeleteMapping("/{planId}/feedback/{feedbackId}")
-    public ResponseEntity<?> deleteFeedback(Authentication authentication, @PathVariable Long feedbackId, @PathVariable Long planId)   {
-        goalService.deleteFeedback(authentication, feedbackId, planId);
+    @DeleteMapping("/{goalId}/feedback/{feedbackId}")
+    public ResponseEntity<?> deleteFeedback(Authentication authentication, @PathVariable Long feedbackId, @PathVariable Long goalId) {
+        goalService.deleteFeedback(authentication, feedbackId, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 삭제가 완료되었습니다");
     }
 
@@ -107,11 +119,11 @@ public class GoalController {
      *
      * @param authentication 유저 인증 정보
      * @param dto            교관 피드백 dto
-     * @param planId         계획 id
+     * @param goalId         계획 id
      */
-    @PutMapping("/{planId}/feedback")
-    public ResponseEntity<?> updateFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long planId)   {
-        goalService.updateFeedback(authentication, dto, planId);
+    @PutMapping("/{goalId}/feedback")
+    public ResponseEntity<?> updateFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long goalId) {
+        goalService.updateFeedback(authentication, dto, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 수정이 완료되었습니다.");
     }
 
@@ -119,11 +131,11 @@ public class GoalController {
      * 셀프 피드백 작성 api
      *
      * @param dto    셀프피드백 작성 dto
-     * @param planId 계획 id
+     * @param goalId 계획 id
      */
-    @PostMapping("/{planId}/self")
-    public ResponseEntity<?> createSelfFeedback(@RequestBody SelfFeedbackDto dto, @PathVariable Long planId) {
-        goalService.createSelfFeedback(dto, planId);
+    @PostMapping("/{goalId}/self")
+    public ResponseEntity<?> createSelfFeedback(@RequestBody SelfFeedbackDto dto, @PathVariable Long goalId) {
+        goalService.createSelfFeedback(dto, goalId);
         return ResponseEntity.status(HttpStatus.CREATED).body("셀프 피드백 작성이 완료되었습니다.");
     }
 
@@ -132,11 +144,11 @@ public class GoalController {
      *
      * @param authentication 유저 인증 정보
      * @param selfId         셀프 피드백 id
-     * @param planId         계획 id
+     * @param goalId         계획 id
      */
-    @DeleteMapping("/{planId}/self/{selfId}")
-    public ResponseEntity<?> deleteSelfFeedback(Authentication authentication, @PathVariable Long selfId, @PathVariable Long planId)   {
-        goalService.deleteSelfFeedback(authentication, selfId, planId);
+    @DeleteMapping("/{goalId}/self/{selfId}")
+    public ResponseEntity<?> deleteSelfFeedback(Authentication authentication, @PathVariable Long selfId, @PathVariable Long goalId) {
+        goalService.deleteSelfFeedback(authentication, selfId, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("셀프 피드백 삭제가 완료되었습니다");
     }
 
@@ -145,11 +157,11 @@ public class GoalController {
      *
      * @param authentication 유저 인증 정보
      * @param dto            셀프 피드백 dto
-     * @param planId         계획 id
+     * @param goalId         계획 id
      */
-    @PutMapping("/{planId}/self")
-    public ResponseEntity<?> updateSelfFeedback(Authentication authentication, @RequestBody SelfFeedbackDto dto, @PathVariable Long planId)   {
-        goalService.updateSelfFeedback(authentication, dto, planId);
+    @PutMapping("/{goalId}/self")
+    public ResponseEntity<?> updateSelfFeedback(Authentication authentication, @RequestBody SelfFeedbackDto dto, @PathVariable Long goalId) {
+        goalService.updateSelfFeedback(authentication, dto, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("셀프 피드백 수정이 완료되었습니다.");
     }
 }

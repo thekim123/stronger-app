@@ -9,4 +9,5 @@ import java.util.Optional;
 
 public interface DailyCheckRepository extends JpaRepository<DailyCheck, Long> {
     Optional<DailyCheck> findByGoalAndCheckDate(Goal goal, LocalDate checkDate);
+
 }

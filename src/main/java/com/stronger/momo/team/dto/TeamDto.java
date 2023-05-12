@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -13,6 +15,8 @@ public class TeamDto {
     private Long id;
     private String teamName;
     private String description;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private boolean isOpen;
 
     private boolean isOwner;
