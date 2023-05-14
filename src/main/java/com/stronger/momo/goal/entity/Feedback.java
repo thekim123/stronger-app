@@ -2,6 +2,7 @@ package com.stronger.momo.goal.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.goal.dto.FeedbackDto;
+import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
@@ -27,9 +28,9 @@ public class Feedback extends BaseTimeEntity {
     @ManyToOne
     private User user;
 
-    @JoinColumn(name = "goalId")
+    @JoinColumn(name = "memberId")
     @ManyToOne
-    private Goal goal;
+    private TeamMember member;
 
     private String comment;
 

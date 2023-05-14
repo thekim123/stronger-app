@@ -64,8 +64,12 @@ public class GoalService {
 
     public Stream<GoalDto> getGoalDtoList(TeamMember teamMember) {
         return goalRepository.findByOwner(teamMember).stream()
-                .map(GoalDto::fromGoal);
+                .map(goal -> {
+                    dailyCheckRepository.findByGoalAndCheckDate(goal, LocalDate.now()).ifPresent(goal::addDailyCheck);
+                    return GoalDto.convertForTodo(goal);
+                });
     }
+
 
     /**
      * @param authentication 유저 인증 정보
@@ -194,7 +198,7 @@ public class GoalService {
     }
 
     @Transactional
-    public void unDailyCheck(Authentication authentication, Long goalId) throws AccessDeniedException {
+    public void updateDailyCheck(Authentication authentication, Long goalId) throws AccessDeniedException {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         isGoalOwner(goalId, user.getId());
 
@@ -203,9 +207,15 @@ public class GoalService {
             throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
         });
 
+        // TODO: 삭제하고 다시 누르면 이게 나옴.
         dailyCheckRepository.findByGoalAndCheckDate(goal, LocalDate.now()).ifPresentOrElse(
-                dailyCheckRepository::delete, () -> {
-                    throw new EntityNotFoundException("오늘의 계획 완수를 누른 적이 없습니다.");
+                dailyCheck -> dailyCheck.setCompleted(!dailyCheck.isCompleted()), () -> {
+                    dailyCheckRepository.save(DailyCheck.builder()
+                            .weeks(goal.getCurrentWeeks())
+                            .checkDate(LocalDate.now())
+                            .isCompleted(true)
+                            .goal(goal)
+                            .build());
                 }
         );
     }
@@ -227,8 +237,8 @@ public class GoalService {
         isGoalInstructor(authentication, goalId);
 
         Feedback feedback = Feedback.builder()
-                .goal(goal)
                 .user(user)
+                .member(goal.getOwner())
                 .comment(dto.getComment())
                 .build();
         feedbackRepository.save(feedback);
@@ -282,7 +292,7 @@ public class GoalService {
         SelfFeedback selfFeedback = SelfFeedback.builder()
                 .reason(dto.getReason())
                 .measure(dto.getMeasure())
-                .goal(goal)
+                .member(goal.getOwner())
                 .build();
         selfFeedbackRepository.save(selfFeedback);
     }

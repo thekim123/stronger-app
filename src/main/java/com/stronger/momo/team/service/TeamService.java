@@ -51,7 +51,7 @@ public class TeamService {
 
         List<TeamMember> teamMemberList = teamMemberRepository.findByTeam(team);
         return teamMemberList.stream()
-                .map(TeamMemberDto::fromTeamMember)
+                .map(TeamMemberDto::from)
                 .collect(Collectors.toList());
     }
 
@@ -63,21 +63,14 @@ public class TeamService {
      * @apiNote 내 그룹 목록 조회 서비스 로직
      */
     @Transactional(readOnly = true)
-    public List<TeamDto> getMyTeamList(Authentication authentication) {
+    public List<TeamMemberDto> getMyTeamList(Authentication authentication) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        List<TeamDto> teamDtoList = new ArrayList<>();
+        List<TeamMemberDto> teamDtoList = new ArrayList<>();
 
         List<TeamMember> teamMemberList = teamMemberRepository.findByUser(user);
         teamMemberList.stream()
-                .filter(teamMember -> !Objects.equals(teamMember.getGrade(), Grade.OWNER))
-                .map(TeamDto::fromMember)
+                .map(TeamMemberDto::from)
                 .forEach(teamDtoList::add);
-
-        List<Team> teamList = teamRepository.findByOwner(user);
-        teamList.stream()
-                .map(TeamDto::fromOwner)
-                .forEach(teamDtoList::add);
-
         return teamDtoList;
     }
 
@@ -106,7 +99,7 @@ public class TeamService {
     public void createTeam(Authentication authentication, TeamDto teamDto) {
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = Team.builder()
-                .groupName(teamDto.getTeamName())
+                .name(teamDto.getTeamName())
                 .description(teamDto.getDescription())
                 .owner(owner)
                 .isOpen(teamDto.isOpen())
@@ -196,6 +189,7 @@ public class TeamService {
 
     /**
      * TODO : JPQL로 변경해야함 조회만 3번함
+     *
      * @param authentication 로그인 인증 정보
      * @param dto            직책 변경 dto
      * @throws AccessDeniedException 그룹장이 아닌 경우 거절
@@ -227,17 +221,16 @@ public class TeamService {
      * 팀 탈퇴 서비스 로직
      *
      * @param authentication 로그인 인증 정보
-     * @param dto            직책 dto
+     * @param memberId       팀원 id
      * @throws AccessDeniedException 신청 정보가 본인이 아닌 경우
      */
     @Transactional
-    public void leaveTeam(Authentication authentication, TeamMemberDto dto) throws AccessDeniedException {
-        TeamMember teamMember = teamMemberRepository.findById(dto.getId()).orElseThrow(() -> {
+    public void leaveTeam(Authentication authentication, Long memberId) throws AccessDeniedException {
+        TeamMember teamMember = teamMemberRepository.findById(memberId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀원은 존재하지 않습니다.");
         });
 
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-
         if (!user.getUsername().equals(teamMember.getUser().getUsername())) {
             throw new AccessDeniedException("탈퇴는 본인만 할 수 있습니다.");
         }

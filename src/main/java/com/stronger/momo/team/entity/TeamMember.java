@@ -1,7 +1,11 @@
 package com.stronger.momo.team.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.stronger.momo.common.BaseTimeEntity;
+import com.stronger.momo.goal.entity.Feedback;
 import com.stronger.momo.goal.entity.Goal;
+import com.stronger.momo.goal.entity.SelfFeedback;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
@@ -20,26 +24,37 @@ import java.util.List;
 @Builder
 @Data
 @Table(name = "team_member")
+@ToString(exclude = {"team", "user"})
 public class TeamMember extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+//    private String introduce;
+
     @Enumerated(EnumType.STRING)
     private Grade grade;
 
+    @JsonIncludeProperties({"id", "name", "startDate", "endDate"})
     @JoinColumn(name = "teamId")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Team team;
 
+    @JsonIncludeProperties({"id", "username", "email", "nickname"})
     @JoinColumn(name = "userId")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     @OneToMany(mappedBy = "owner")
     @Builder.Default
     private List<Goal> goal = new ArrayList<>();
+    @OneToMany(mappedBy = "member")
+    @Builder.Default
+    private List<SelfFeedback> selfFeedbackList = new ArrayList<>();
+    @OneToMany(mappedBy = "member")
+    @Builder.Default
+    private List<Feedback> feedbackList = new ArrayList<>();
 
 
     /**

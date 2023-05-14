@@ -18,6 +18,8 @@ import java.util.List;
 @Builder
 @Data
 @Table(name = "team")
+@ToString(exclude = {"teamMemberList"})
+@JsonIgnoreProperties({"teamMemberList"})
 public class Team extends BaseTimeEntity {
 
     @Id
@@ -25,7 +27,7 @@ public class Team extends BaseTimeEntity {
     private Long id;
 
     @Column(unique = true)
-    private String groupName;
+    private String name;
 
     private String description;
     private boolean isOpen;
@@ -44,7 +46,7 @@ public class Team extends BaseTimeEntity {
     private List<TeamMember> teamMemberList = new ArrayList<>();
 
     public void update(TeamDto dto) {
-        this.groupName = dto.getTeamName();
+        this.name = dto.getTeamName();
         this.description = dto.getDescription();
         this.isOpen = dto.isOpen();
     }

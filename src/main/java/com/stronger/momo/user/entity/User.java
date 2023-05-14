@@ -5,6 +5,7 @@ import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.sns.entity.Sns;
+import com.stronger.momo.user.dto.UserDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,6 +19,8 @@ import java.util.List;
 @Data
 @Builder
 @Table(name = "user")
+@ToString(exclude ={ "teamList", "teamMemberList", "snsList"})
+@JsonIgnoreProperties({"teamList", "teamMemberList", "snsList"})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -46,4 +49,10 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "writer")
     private List<Sns> snsList;
 
+    public void update(UserDto dto, String encPassword) {
+        this.nickname = dto.getNickname();
+        this.email = dto.getEmail();
+        this.birthday = dto.getBirthday();
+        this.password = encPassword;
+    }
 }

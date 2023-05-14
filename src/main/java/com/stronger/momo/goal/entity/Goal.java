@@ -1,5 +1,6 @@
 package com.stronger.momo.goal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.goal.dto.GoalUpdateDto;
 import com.stronger.momo.team.entity.Team;
@@ -21,6 +22,8 @@ import java.util.List;
 @Builder
 @Data
 @Table(name = "goal")
+@ToString(exclude = {"owner", "team",  })
+@JsonIgnoreProperties({"owner", "team"})
 public class Goal extends BaseTimeEntity {
 
     @Id
@@ -48,21 +51,22 @@ public class Goal extends BaseTimeEntity {
     @JoinColumn(name = "teamId")
     @ManyToOne
     private Team team;
-    @OneToMany(mappedBy = "goal", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "goal", cascade = CascadeType.REMOVE)
     @Builder.Default
     private List<DailyCheck> dailyCheckList = new ArrayList<>();
-    @OneToMany(mappedBy = "goal")
-    @Builder.Default
-    private List<SelfFeedback> selfFeedbackList = new ArrayList<>();
-    @OneToMany(mappedBy = "goal")
-    @Builder.Default
-    private List<Feedback> feedbackList = new ArrayList<>();
 
+    /**
+     * 목표 수정시 값 변경 함수
+     *
+     * @param dto 변경할 값
+     */
     public void update(GoalUpdateDto dto) {
         this.goalCount = dto.getGoalCount();
         this.title = dto.getTitle();
         this.content = dto.getContent();
     }
 
-
+    public void addDailyCheck(DailyCheck dailyCheck) {
+        this.dailyCheckList.add(dailyCheck);
+    }
 }

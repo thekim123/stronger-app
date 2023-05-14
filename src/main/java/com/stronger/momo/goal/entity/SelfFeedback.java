@@ -2,6 +2,7 @@ package com.stronger.momo.goal.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.goal.dto.SelfFeedbackDto;
+import com.stronger.momo.team.entity.TeamMember;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,9 +23,9 @@ public class SelfFeedback extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "goalId")
+    @JoinColumn(name = "memberId")
     @ManyToOne
-    private Goal goal;
+    private TeamMember member;
 
     // 실패 이유
     private String reason;

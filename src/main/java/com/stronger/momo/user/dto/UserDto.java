@@ -22,6 +22,16 @@ public class UserDto {
     private String email;
     private LocalDate birthday;
 
+    public static UserDto from(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .build();
+    }
+
     public User toEntity(String encPassword) {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);

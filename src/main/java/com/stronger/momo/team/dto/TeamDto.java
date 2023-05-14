@@ -1,7 +1,6 @@
 package com.stronger.momo.team.dto;
 
 import com.stronger.momo.team.entity.Team;
-import com.stronger.momo.team.entity.TeamMember;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +18,6 @@ public class TeamDto {
     private LocalDate endDate;
     private boolean isOpen;
 
-    private boolean isOwner;
 
     /**
      * TeamDto 객체를 Team 객체로 변환하는 정적 팩터리 메서드
@@ -32,28 +30,9 @@ public class TeamDto {
     public static TeamDto from(Team team) {
         return TeamDto.builder()
                 .id(team.getId())
-                .teamName(team.getGroupName())
+                .teamName(team.getName())
                 .description(team.getDescription())
-                .isOwner(true)
                 .build();
     }
 
-    public static TeamDto fromOwner(Team team) {
-        return TeamDto.builder()
-                .id(team.getId())
-                .teamName(team.getGroupName())
-                .description(team.getDescription())
-                .isOwner(true)
-                .build();
-    }
-
-    public static TeamDto fromMember(TeamMember teamMember) {
-        Team team = teamMember.getTeam();
-        return TeamDto.builder()
-                .id(team.getId())
-                .teamName(team.getGroupName())
-                .description(team.getDescription())
-                .isOwner(false)
-                .build();
-    }
 }

@@ -82,9 +82,9 @@ public class GoalController {
         return ResponseEntity.status(HttpStatus.OK).body("계획 완수 체크가 완료되었습니다.");
     }
 
-    @DeleteMapping("/{goalId}/daily")
+    @PutMapping("/{goalId}/daily")
     public ResponseEntity<?> unDailyCheck(Authentication authentication, @PathVariable Long goalId) {
-        goalService.unDailyCheck(authentication, goalId);
+        goalService.updateDailyCheck(authentication, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("계획 완수 체크가 완료되었습니다.");
     }
 

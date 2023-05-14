@@ -1,6 +1,8 @@
 package com.stronger.momo.goal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
+import com.stronger.momo.goal.dto.DailyCheckDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,6 +15,8 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "daily_check")
+@ToString(exclude = {"goal"})
+@JsonIgnoreProperties({"goal"})
 public class DailyCheck extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,4 +34,12 @@ public class DailyCheck extends BaseTimeEntity {
     private Goal goal;
 
 
+    public DailyCheckDto toDto() {
+        return DailyCheckDto.builder()
+                .id(id)
+                .weeks(weeks)
+                .checkDate(checkDate)
+                .completed(isCompleted)
+                .build();
+    }
 }

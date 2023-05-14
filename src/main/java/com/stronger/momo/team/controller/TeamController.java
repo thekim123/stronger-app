@@ -32,7 +32,6 @@ public class TeamController {
     @GetMapping("/owner/{teamId}")
     public ResponseEntity<?> getTeamMemberList(Authentication authentication, @PathVariable Long teamId) {
         List<TeamMemberDto> dtoList = teamService.getTeamMemberList(authentication, teamId);
-        System.out.println(dtoList);
         return ResponseEntity.status(HttpStatus.OK).body(dtoList);
     }
 
@@ -44,7 +43,8 @@ public class TeamController {
      */
     @GetMapping("/my-list")
     public ResponseEntity<?> getMyTeamList(Authentication authentication) {
-        return ResponseEntity.status(HttpStatus.OK).body(teamService.getMyTeamList(authentication));
+        List<TeamMemberDto> myList = teamService.getMyTeamList(authentication);
+        return ResponseEntity.status(HttpStatus.OK).body(myList);
     }
 
     /**
@@ -54,7 +54,8 @@ public class TeamController {
      */
     @GetMapping("/list")
     public ResponseEntity<?> getPublicTeamList() {
-        return ResponseEntity.status(HttpStatus.OK).body(teamService.getPublicTeamList());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(teamService.getPublicTeamList());
     }
 
     /**
@@ -102,10 +103,12 @@ public class TeamController {
      *
      * @param authentication 로그인 인증 정보
      * @param groupId        그룹 id
-     * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @PostMapping("/join/{groupId}")
-    public ResponseEntity<?> joinGroup(Authentication authentication, @PathVariable Long groupId) throws AccessDeniedException {
+    public ResponseEntity<?> joinGroup(Authentication authentication
+            , @PathVariable Long groupId
+            , String introduce) {
+        System.out.println(introduce);
         teamService.joinGroup(authentication, groupId);
         return ResponseEntity.status(HttpStatus.CREATED).body("팀 가입 신청이 완료되었습니다.");
     }
@@ -115,17 +118,16 @@ public class TeamController {
      *
      * @param authentication 로그인 인증 정보
      * @param dto            직책 변경 dto
-     * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @PutMapping("/position")
-    public ResponseEntity<?> updatePosition(Authentication authentication, @RequestBody TeamMemberDto dto) throws AccessDeniedException {
+    public ResponseEntity<?> updatePosition(Authentication authentication, @RequestBody TeamMemberDto dto)   {
         teamService.updatePosition(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("팀 멤버의 직책을 바꿨습니다.");
     }
 
-    @DeleteMapping("/leave")
-    public ResponseEntity<?> leaveGroup(Authentication authentication, @RequestBody TeamMemberDto dto) throws AccessDeniedException {
-        teamService.leaveTeam(authentication, dto);
+    @DeleteMapping("/leave/{memberId}")
+    public ResponseEntity<?> leaveGroup(Authentication authentication, @PathVariable Long memberId)   {
+        teamService.leaveTeam(authentication, memberId);
         return ResponseEntity.status(HttpStatus.OK).body("팀 탈퇴가 완료되었습니다.");
     }
 

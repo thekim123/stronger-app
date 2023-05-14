@@ -3,6 +3,7 @@ package com.stronger.momo.team.repository;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.user.entity.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     List<TeamMember> findByUser(User user);
 
+    @EntityGraph(attributePaths = {"user.nickname", "user.id", "team.id", "team.name"})
     List<TeamMember> findByTeam(Team team);
 
 }
