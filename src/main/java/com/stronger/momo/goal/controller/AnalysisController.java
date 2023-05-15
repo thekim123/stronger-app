@@ -1,5 +1,7 @@
 package com.stronger.momo.goal.controller;
 
+import com.stronger.momo.goal.dto.AnalysisDto;
+import com.stronger.momo.goal.dto.GoalAnalisysDto;
 import com.stronger.momo.goal.service.AnalysisService;
 import com.stronger.momo.team.entity.TeamMember;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,8 @@ public class AnalysisController {
             Authentication authentication,
             @PathVariable String selectedDate,
             @PathVariable Long teamId) {
-        List<TeamMember> teamMemberList
+        AnalysisDto result
                 = analysisService.getAnalysis(authentication, teamId, selectedDate);
-        return ResponseEntity.status(HttpStatus.OK).body(teamMemberList);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

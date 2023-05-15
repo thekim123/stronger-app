@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class FeedbackDto {
     private Long id;
     private String comment;
+    private String checkDate;
 
 }

@@ -28,20 +28,11 @@ public class GoalDto {
                 .goalCount(goal.getGoalCount())
                 .actionCount(goal.getActionCount())
                 .currentWeeks(goal.getCurrentWeeks())
-                .build();
-    }
-
-    public static GoalDto convertForTodo(Goal goal) {
-        return GoalDto.builder()
-                .id(goal.getId())
-                .title(goal.getTitle())
-                .content(goal.getContent())
-                .goalCount(goal.getGoalCount())
-                .actionCount(goal.getActionCount())
-                .currentWeeks(goal.getCurrentWeeks())
                 .dailyCheck(!goal.getDailyCheckList().isEmpty()
                         ? goal.getDailyCheckList().get(0).toDto()
                         : DailyCheckDto.builder().completed(false).build())
                 .build();
     }
+
+
 }

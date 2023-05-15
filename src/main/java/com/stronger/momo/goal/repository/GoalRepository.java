@@ -12,4 +12,5 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 //    List<Goal> mFindTodoList(User owner, @Param("today") LocalDate today);
 
     List<Goal> findByOwner(TeamMember user);
+
 }

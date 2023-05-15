@@ -66,7 +66,7 @@ public class GoalService {
         return goalRepository.findByOwner(teamMember).stream()
                 .map(goal -> {
                     dailyCheckRepository.findByGoalAndCheckDate(goal, LocalDate.now()).ifPresent(goal::addDailyCheck);
-                    return GoalDto.convertForTodo(goal);
+                    return GoalDto.fromGoal(goal);
                 });
     }
 

@@ -6,6 +6,7 @@ import com.stronger.momo.team.entity.TeamMember;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 /**
  * 자가피드백 Entity
@@ -33,9 +34,23 @@ public class SelfFeedback extends BaseTimeEntity {
     // 대책
     private String measure;
 
+    private LocalDate checkDate;
+
     public void update(SelfFeedbackDto dto) {
         this.reason = dto.getReason();
         this.measure = dto.getMeasure();
     }
 
+    public SelfFeedbackDto toDto() {
+        if (id == null) {
+            return new SelfFeedbackDto();
+        }
+
+        return SelfFeedbackDto.builder()
+                .id(id)
+                .reason(reason)
+                .measure(measure)
+                .checkDate(checkDate.toString())
+                .build();
+    }
 }

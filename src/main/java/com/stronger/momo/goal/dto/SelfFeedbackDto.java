@@ -13,5 +13,5 @@ public class SelfFeedbackDto {
     private Long id;
     private String reason;
     private String measure;
-
+    private String checkDate;
 }

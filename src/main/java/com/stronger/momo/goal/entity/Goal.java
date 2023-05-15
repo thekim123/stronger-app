@@ -22,8 +22,8 @@ import java.util.List;
 @Builder
 @Data
 @Table(name = "goal")
-@ToString(exclude = {"owner", "team",  })
-@JsonIgnoreProperties({"owner", "team"})
+@ToString(exclude = {"owner", "team", "dailyCheckList"})
+@JsonIgnoreProperties({"owner", "team", "dailyCheckList"})
 public class Goal extends BaseTimeEntity {
 
     @Id
