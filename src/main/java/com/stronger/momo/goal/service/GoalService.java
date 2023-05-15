@@ -224,37 +224,37 @@ public class GoalService {
     /**
      * 교관 피드백 작성 서비스 메서드
      *
-     * @param dto    교관 피드백 작성 dto
-     * @param goalId 계획 id
+     * @param dto      교관 피드백 작성 dto
+     * @param memberId 피드백 받는 팀원 id
      */
     @Transactional
-    public void createFeedback(Authentication authentication, FeedbackDto dto, Long goalId) {
+    public FeedbackDto createFeedback(Authentication authentication, FeedbackDto dto, Long memberId) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
 
-        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
+        TeamMember member = teamMemberRepository.findById(memberId).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 팀원이 DB에 없습니다.");
         });
-        isGoalInstructor(authentication, goalId);
+        isGoalInstructor(memberId);
 
         Feedback feedback = Feedback.builder()
                 .user(user)
-                .member(goal.getOwner())
+                .member(member)
                 .comment(dto.getComment())
+                .checkDate(LocalDate.now())
                 .build();
         feedbackRepository.save(feedback);
+        return FeedbackDto.fromFeedback(feedback);
     }
 
     /**
-     * 교관 피드백 삭제 서비스 메서드
-     *
-     * @param authentication 유저 인증 정보
-     * @param feedbackId     교관 피드백 id
-     * @param goalId         계획 id
+     * @param feedbackId 교관 피드백 id
+     * @param memberId   계획 id
      * @throws AccessDeniedException 셀프 피드백의 소유자가 아닌 경우
+     * @apiNote 교관 피드백 삭제 서비스 메서드
      */
     @Transactional
-    public void deleteFeedback(Authentication authentication, Long feedbackId, Long goalId) throws AccessDeniedException {
-        isGoalInstructor(authentication, goalId);
+    public void deleteFeedback(Long feedbackId, Long memberId) throws AccessDeniedException {
+        isGoalInstructor(memberId);
         feedbackRepository.deleteById(feedbackId);
     }
 
@@ -269,7 +269,7 @@ public class GoalService {
      */
     @Transactional
     public void updateFeedback(Authentication authentication, FeedbackDto dto, Long goalId) throws AccessDeniedException {
-        isGoalInstructor(authentication, goalId);
+        isGoalInstructor(goalId);
         Feedback entity = feedbackRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 교관 피드백이 존재하지 않습니다");
         });
@@ -281,35 +281,36 @@ public class GoalService {
      * 셀프 피드백 작성 서비스 메서드
      *
      * @param dto    셀프피드백 작성 dto
-     * @param goalId 계획 id
+     * @param memberId 계획 id
      */
     @Transactional
-    public void createSelfFeedback(SelfFeedbackDto dto, Long goalId) {
-        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 계획이 DB에 없습니다.");
+    public SelfFeedbackDto createSelfFeedback(SelfFeedbackDto dto, Long memberId) {
+        TeamMember member = teamMemberRepository.findById(memberId).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 팀원이 DB에 없습니다.");
         });
 
         SelfFeedback selfFeedback = SelfFeedback.builder()
                 .reason(dto.getReason())
                 .measure(dto.getMeasure())
-                .member(goal.getOwner())
+                .checkDate(dto.getCheckDate())
+                .member(member)
                 .build();
         selfFeedbackRepository.save(selfFeedback);
+        return SelfFeedbackDto.fromSelfFeedback(selfFeedback);
     }
 
 
     /**
-     * 셀프 피드백 삭제 서비스 메서드
+     * TODO: 삭제 권한에 대한 판별을 해야함.
      *
      * @param authentication 유저 인증 정보
      * @param selfId         셀프 피드백 id
-     * @param goalId         계획 id
+     * @param memberId       계획 id
      * @throws AccessDeniedException 셀프 피드백의 소유자가 아닌 경우
+     * @apiNote 셀프 피드백 삭제 서비스 메서드
      */
     @Transactional
-    public void deleteSelfFeedback(Authentication authentication, Long selfId, Long goalId) throws AccessDeniedException {
-        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        isGoalOwner(goalId, user.getId());
+    public void deleteSelfFeedback(Authentication authentication, Long selfId, Long memberId) throws AccessDeniedException {
         selfFeedbackRepository.deleteById(selfId);
     }
 
@@ -324,8 +325,6 @@ public class GoalService {
      */
     @Transactional
     public void updateSelfFeedback(Authentication authentication, SelfFeedbackDto dto, Long goalId) throws AccessDeniedException {
-        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        isGoalOwner(goalId, user.getId());
         SelfFeedback entity = selfFeedbackRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 셀프 피드백이 존재하지 않습니다");
         });
@@ -361,20 +360,15 @@ public class GoalService {
     /**
      * 계획의 교관인지 판정하는 메서드
      *
-     * @param authentication 유저(교관) 인증 정보
-     * @param goalId         계획 id
+     * @param memberId 계획 id
      * @throws AccessDeniedException 계획의 교관이 아닌 경우
      */
-    private void isGoalInstructor(Authentication authentication, Long goalId) throws AccessDeniedException {
-        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        Goal goal = goalRepository.findById(goalId).orElseThrow(() -> {
+    private void isGoalInstructor(Long memberId) throws AccessDeniedException {
+        TeamMember member = teamMemberRepository.findById(memberId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 계획을 찾을 수 없습니다.");
         });
 
-        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(user, goal.getTeam()).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다.");
-        });
-        Grade grade = teamMember.getGrade();
+        Grade grade = member.getGrade();
         if (grade.equals(Grade.MEMBER) || grade.equals(Grade.PENDING)) {
             throw new AccessDeniedException("해당 계획의 교관이 아닙니다.");
         }

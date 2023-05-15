@@ -50,7 +50,7 @@ public class SelfFeedback extends BaseTimeEntity {
                 .id(id)
                 .reason(reason)
                 .measure(measure)
-                .checkDate(checkDate.toString())
+                .checkDate(checkDate)
                 .build();
     }
 }

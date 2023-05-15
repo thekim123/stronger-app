@@ -92,25 +92,25 @@ public class GoalController {
     /**
      * 교관 피드백 작성 api
      *
-     * @param dto    교관 피드백 작성 dto
-     * @param goalId 계획 id
+     * @param dto      교관 피드백 작성 dto
+     * @param memberId 계획 id
      */
-    @PostMapping("/{goalId}/feedback")
-    public ResponseEntity<?> createFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long goalId) {
-        goalService.createFeedback(authentication, dto, goalId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("교관 피드백 작성이 완료되었습니다.");
+    @PostMapping("/{memberId}/feedback")
+    public ResponseEntity<?> createFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long memberId) {
+        FeedbackDto result = goalService.createFeedback(authentication, dto, memberId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     /**
-     * 교관 피드백 삭제 api
-     *
-     * @param authentication 유저 인증 정보
-     * @param feedbackId     교관 피드백 id
-     * @param goalId         계획 id
+     * @param feedbackId 교관 피드백 id
+     * @param memberId   계획 id
+     * @apiNote 교관 피드백 삭제 api
      */
-    @DeleteMapping("/{goalId}/feedback/{feedbackId}")
-    public ResponseEntity<?> deleteFeedback(Authentication authentication, @PathVariable Long feedbackId, @PathVariable Long goalId) {
-        goalService.deleteFeedback(authentication, feedbackId, goalId);
+    @DeleteMapping("/{memberId}/feedback/{feedbackId}")
+    public ResponseEntity<?> deleteFeedback(
+            @PathVariable Long feedbackId,
+            @PathVariable Long memberId) {
+        goalService.deleteFeedback(feedbackId, memberId);
         return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 삭제가 완료되었습니다");
     }
 
@@ -122,42 +122,47 @@ public class GoalController {
      * @param goalId         계획 id
      */
     @PutMapping("/{goalId}/feedback")
-    public ResponseEntity<?> updateFeedback(Authentication authentication, @RequestBody FeedbackDto dto, @PathVariable Long goalId) {
+    public ResponseEntity<?> updateFeedback(
+            Authentication authentication,
+            @RequestBody FeedbackDto dto,
+            @PathVariable Long goalId) {
         goalService.updateFeedback(authentication, dto, goalId);
         return ResponseEntity.status(HttpStatus.OK).body("교관 피드백 수정이 완료되었습니다.");
     }
 
     /**
-     * 셀프 피드백 작성 api
-     *
-     * @param dto    셀프피드백 작성 dto
-     * @param goalId 계획 id
+     * @param dto      셀프피드백 작성 dto
+     * @param memberId 계획 id
+     * @apiNote 셀프 피드백 작성 api
      */
-    @PostMapping("/{goalId}/self")
-    public ResponseEntity<?> createSelfFeedback(@RequestBody SelfFeedbackDto dto, @PathVariable Long goalId) {
-        goalService.createSelfFeedback(dto, goalId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("셀프 피드백 작성이 완료되었습니다.");
+    @PostMapping("/{memberId}/self")
+    public ResponseEntity<?> createSelfFeedback(
+            @RequestBody SelfFeedbackDto dto,
+            @PathVariable Long memberId) {
+        SelfFeedbackDto result = goalService.createSelfFeedback(dto, memberId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     /**
-     * 셀프 피드백 삭제 api
-     *
      * @param authentication 유저 인증 정보
      * @param selfId         셀프 피드백 id
-     * @param goalId         계획 id
+     * @param memberId       계획 id
+     * @apiNote 피드백 삭제 api
      */
-    @DeleteMapping("/{goalId}/self/{selfId}")
-    public ResponseEntity<?> deleteSelfFeedback(Authentication authentication, @PathVariable Long selfId, @PathVariable Long goalId) {
-        goalService.deleteSelfFeedback(authentication, selfId, goalId);
+    @DeleteMapping("/{memberId}/self/{selfId}")
+    public ResponseEntity<?> deleteSelfFeedback(
+            Authentication authentication,
+            @PathVariable Long selfId,
+            @PathVariable Long memberId) {
+        goalService.deleteSelfFeedback(authentication, selfId, memberId);
         return ResponseEntity.status(HttpStatus.OK).body("셀프 피드백 삭제가 완료되었습니다");
     }
 
     /**
-     * 셀프 피드백 수정 서비스 메서드
-     *
      * @param authentication 유저 인증 정보
      * @param dto            셀프 피드백 dto
      * @param goalId         계획 id
+     * @apiNote 셀프 피드백 수정 서비스 메서드
      */
     @PutMapping("/{goalId}/self")
     public ResponseEntity<?> updateSelfFeedback(Authentication authentication, @RequestBody SelfFeedbackDto dto, @PathVariable Long goalId) {
