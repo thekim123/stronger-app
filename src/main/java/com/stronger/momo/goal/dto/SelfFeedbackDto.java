@@ -1,9 +1,12 @@
 package com.stronger.momo.goal.dto;
 
+import com.stronger.momo.goal.entity.SelfFeedback;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -13,5 +16,14 @@ public class SelfFeedbackDto {
     private Long id;
     private String reason;
     private String measure;
-    private String checkDate;
+    private LocalDate checkDate;
+
+    public static SelfFeedbackDto fromSelfFeedback(SelfFeedback selfFeedback) {
+        return SelfFeedbackDto.builder()
+                .id(selfFeedback.getId())
+                .reason(selfFeedback.getReason())
+                .measure(selfFeedback.getMeasure())
+                .checkDate(selfFeedback.getCheckDate())
+                .build();
+    }
 }
