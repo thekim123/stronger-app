@@ -13,7 +13,7 @@ import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sns")
+@RequestMapping("api/sns")
 public class SnsController {
     private final SnsService snsService;
 
