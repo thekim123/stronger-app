@@ -23,15 +23,14 @@ public class TeamController {
     private final TeamService teamService;
 
     /**
-     * 그룹 생성 API
-     *
+     * @apiNote 그룹원 목록 조회 API
      * @param authentication 로그인 인증 정보
-     * @param teamId         팀 id
+     * @param memberId       그룹장 id
      * @return 그룹 생성 dto
      */
-    @GetMapping("/owner/{teamId}")
-    public ResponseEntity<?> getTeamMemberList(Authentication authentication, @PathVariable Long teamId) {
-        List<TeamMemberDto> dtoList = teamService.getTeamMemberList(authentication, teamId);
+    @GetMapping("/owner/{memberId}")
+    public ResponseEntity<?> getTeamMemberList(Authentication authentication, @PathVariable Long memberId) {
+        List<TeamMemberDto> dtoList = teamService.getTeamMemberList(authentication, memberId);
         return ResponseEntity.status(HttpStatus.OK).body(dtoList);
     }
 
@@ -120,13 +119,13 @@ public class TeamController {
      * @param dto            직책 변경 dto
      */
     @PutMapping("/position")
-    public ResponseEntity<?> updatePosition(Authentication authentication, @RequestBody TeamMemberDto dto)   {
+    public ResponseEntity<?> updatePosition(Authentication authentication, @RequestBody TeamMemberDto dto) {
         teamService.updatePosition(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("팀 멤버의 직책을 바꿨습니다.");
     }
 
     @DeleteMapping("/leave/{memberId}")
-    public ResponseEntity<?> leaveGroup(Authentication authentication, @PathVariable Long memberId)   {
+    public ResponseEntity<?> leaveGroup(Authentication authentication, @PathVariable Long memberId) {
         teamService.leaveTeam(authentication, memberId);
         return ResponseEntity.status(HttpStatus.OK).body("팀 탈퇴가 완료되었습니다.");
     }
