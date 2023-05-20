@@ -29,6 +29,9 @@ public class Team extends BaseTimeEntity {
     @Column(unique = true)
     private String name;
 
+    @Column(unique = true)
+    private String teamCode;
+
     private String description;
     private boolean isOpen;
     private LocalDate startDate;

@@ -24,9 +24,9 @@ public class SelfFeedback extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "planId")
     @ManyToOne
-    private TeamMember member;
+    private Plan plan;
 
     // 실패 이유
     private String reason;

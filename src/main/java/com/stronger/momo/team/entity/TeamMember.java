@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.goal.entity.Feedback;
 import com.stronger.momo.goal.entity.Goal;
+import com.stronger.momo.goal.entity.Plan;
 import com.stronger.momo.goal.entity.SelfFeedback;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
@@ -46,27 +47,16 @@ public class TeamMember extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "owner")
-    @Builder.Default
-    private List<Goal> goal = new ArrayList<>();
     @OneToMany(mappedBy = "member")
     @Builder.Default
-    private List<SelfFeedback> selfFeedbackList = new ArrayList<>();
-    @OneToMany(mappedBy = "member")
-    @Builder.Default
-    private List<Feedback> feedbackList = new ArrayList<>();
-
+    private List<Plan> planList = new ArrayList<>();
 
     /**
      * 직책 수정시 값 변경 함수
      *
-     * @param user         변경 유저
-     * @param team         그룹
      * @param positionName 직책 코드
      */
-    public void update(User user, Team team, String positionName) {
-        this.team = team;
-        this.user = user;
+    public void update(String positionName) {
         this.grade = Grade.valueOf(positionName);
     }
 

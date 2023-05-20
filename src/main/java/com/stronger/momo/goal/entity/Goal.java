@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.goal.dto.GoalUpdateDto;
 import com.stronger.momo.team.entity.Team;
-import com.stronger.momo.team.entity.TeamMember;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,8 +21,8 @@ import java.util.List;
 @Builder
 @Data
 @Table(name = "goal")
-@ToString(exclude = {"owner", "team", "dailyCheckList"})
-@JsonIgnoreProperties({"owner", "team", "dailyCheckList"})
+@ToString(exclude = {"plan", "dailyCheckList"})
+@JsonIgnoreProperties({"plan", "dailyCheckList"})
 public class Goal extends BaseTimeEntity {
 
     @Id
@@ -45,12 +44,9 @@ public class Goal extends BaseTimeEntity {
     //TODO: 지워도될듯?
     private Integer currentWeeks;
 
-    @JoinColumn(name = "ownerId")
+    @JoinColumn(name = "planId")
     @ManyToOne
-    private TeamMember owner;
-    @JoinColumn(name = "teamId")
-    @ManyToOne
-    private Team team;
+    private Plan plan;
     @OneToMany(mappedBy = "goal", cascade = CascadeType.REMOVE)
     @Builder.Default
     private List<DailyCheck> dailyCheckList = new ArrayList<>();

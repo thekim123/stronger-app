@@ -2,14 +2,8 @@ package com.stronger.momo.goal.service;
 
 import com.stronger.momo.config.security.PrincipalDetails;
 import com.stronger.momo.goal.dto.*;
-import com.stronger.momo.goal.entity.DailyCheck;
-import com.stronger.momo.goal.entity.Feedback;
-import com.stronger.momo.goal.entity.Goal;
-import com.stronger.momo.goal.entity.SelfFeedback;
-import com.stronger.momo.goal.repository.DailyCheckRepository;
-import com.stronger.momo.goal.repository.FeedbackRepository;
-import com.stronger.momo.goal.repository.GoalRepository;
-import com.stronger.momo.goal.repository.SelfFeedbackRepository;
+import com.stronger.momo.goal.entity.*;
+import com.stronger.momo.goal.repository.*;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.team.entity.Grade;
@@ -42,6 +36,7 @@ public class GoalService {
     private final UserRepository userRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamRepository teamRepository;
+    private final PlanRepository planRepository;
 
 
     /**
@@ -102,11 +97,11 @@ public class GoalService {
     @Transactional
     public GoalDto createGoal(Authentication authentication, GoalCreateDto dto) {
         User member = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        Team team = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
+        Plan plan = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
         });
 
-        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(member, team).orElseThrow(() -> {
+        TeamMember teamMember = teamMemberRepository.findByUserAndTeam(member, plan).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀의 멤버가 아닙니다.");
         });
 
@@ -115,13 +110,12 @@ public class GoalService {
         }
 
         Goal goal = Goal.builder()
-                .owner(teamMember)
                 .actionCount(0)
                 .currentWeeks(0)
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .goalCount(dto.getGoalCount())
-                .team(team)
+                .plan()
                 .build();
 
         Goal insertedGoal = goalRepository.save(goal);
@@ -280,7 +274,7 @@ public class GoalService {
     /**
      * 셀프 피드백 작성 서비스 메서드
      *
-     * @param dto    셀프피드백 작성 dto
+     * @param dto      셀프피드백 작성 dto
      * @param memberId 계획 id
      */
     @Transactional

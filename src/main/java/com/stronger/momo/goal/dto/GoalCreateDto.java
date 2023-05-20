@@ -18,7 +18,7 @@ public class GoalCreateDto {
     private String title;
     private String content;
     private Integer goalCount;
-    private Long teamId;
+    private Long planId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;

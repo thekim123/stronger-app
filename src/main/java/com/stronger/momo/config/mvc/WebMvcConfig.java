@@ -19,7 +19,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                     @Override
                     protected Resource getResource(String resourcePath, Resource location) {
                         Resource requestedResource = new ClassPathResource("static/" + resourcePath);
-                        return requestedResource.exists() && requestedResource.isReadable() ? requestedResource : new ClassPathResource("static/index.html");
+                        return requestedResource.exists() && requestedResource.isReadable() ? requestedResource : new ClassPathResource("/static/index.html");
                     }
                 });
     }

@@ -14,6 +14,7 @@ public class TeamDto {
     private Long id;
     private String teamName;
     private String description;
+    private String teamCode;
     private LocalDate startDate;
     private LocalDate endDate;
     private boolean isOpen;
@@ -31,6 +32,7 @@ public class TeamDto {
         return TeamDto.builder()
                 .id(team.getId())
                 .teamName(team.getName())
+                .teamCode(team.getTeamCode())
                 .description(team.getDescription())
                 .build();
     }

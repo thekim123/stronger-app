@@ -29,9 +29,9 @@ public class Feedback extends BaseTimeEntity {
     @ManyToOne
     private User user;
 
-    @JoinColumn(name = "memberId")
+    @JoinColumn(name = "planId")
     @ManyToOne
-    private TeamMember member;
+    private Plan plan;
 
     private String comment;
 

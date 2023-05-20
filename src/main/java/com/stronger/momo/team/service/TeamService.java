@@ -21,6 +21,7 @@ import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +36,7 @@ public class TeamService {
      * 그룹원 목록 조회 서비스 로직
      *
      * @param authentication 로그인 인증 정보
-     * @param memberId         그룹 id
+     * @param memberId       그룹 id
      * @return 그룹원 목록 dto
      * @throws AccessDeniedException   권한 없음 예외
      * @throws EntityNotFoundException 그룹 없음 예외
@@ -92,7 +93,9 @@ public class TeamService {
      * @param teamDto        그룹 생성 dto
      */
     @Transactional
-    public void createTeam(Authentication authentication, TeamDto teamDto) {
+    public String createTeam(Authentication authentication, TeamDto teamDto) {
+        UUID uuid = UUID.randomUUID();
+        String teamCode = uuid.toString();
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = Team.builder()
                 .name(teamDto.getTeamName())
@@ -101,6 +104,7 @@ public class TeamService {
                 .isOpen(teamDto.isOpen())
                 .startDate(teamDto.getStartDate())
                 .endDate(teamDto.getEndDate())
+                .teamCode(teamCode)
                 .build();
 
         TeamMember teamMember = TeamMember.builder()
@@ -111,6 +115,7 @@ public class TeamService {
 
         teamRepository.save(team);
         teamMemberRepository.save(teamMember);
+        return teamCode;
     }
 
 
@@ -168,7 +173,7 @@ public class TeamService {
      * @throws AccessDeniedException 그룹장이 아닌 경우 거절
      */
     @Transactional
-    public void joinGroup(Authentication authentication, Long groupId) throws AccessDeniedException {
+    public void joinTeam(Authentication authentication, Long groupId) throws AccessDeniedException {
         Team team = teamRepository.findById(groupId).orElseThrow(() -> {
             throw new EntityNotFoundException("팀이 존재하지 않습니다");
         });
@@ -183,6 +188,25 @@ public class TeamService {
     }
 
 
+    @Transactional
+    public void privateJoinTeam(Authentication authentication, String teamCode) {
+        User user = ((PrincipalDetails) authentication.getPrincipal())
+                .getUser();
+        Team team = teamRepository
+                .findByTeamCode(teamCode)
+                .orElseThrow(() -> {
+                    throw new EntityNotFoundException("팀이 존재하지 않습니다.");
+                });
+
+        TeamMember teamMember =
+                TeamMember.builder()
+                        .user(user)
+                        .team(team)
+                        .grade(Grade.PENDING)
+                        .build();
+        teamMemberRepository.save(teamMember);
+    }
+
     /**
      * TODO : JPQL로 변경해야함 조회만 3번함
      *
@@ -192,25 +216,24 @@ public class TeamService {
      * @apiNote 팀 직책 변경 서비스 로직
      */
     @Transactional
-    public void updatePosition(Authentication authentication, TeamMemberDto dto) throws AccessDeniedException {
-        User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+    public void updatePosition(
+            Authentication authentication,
+            TeamMemberDto dto) throws AccessDeniedException {
+        User loginUser = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         Team team = teamRepository.findById(dto.getTeamId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀이 존재하지 않습니다");
         });
 
-        User user = userRepository.findById(dto.getUserId()).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 유저가 존재하지 않습니다.");
-        });
+        TeamMember teamMember =
+                teamMemberRepository.findById(dto.getId()).orElseThrow(() -> {
+                    throw new EntityNotFoundException("해당 팀원이 존재하지 않습니다.");
+                });
 
-        TeamMember teamMember = teamMemberRepository.findById(dto.getId()).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 팀원이 존재하지 않습니다.");
-        });
-
-        if (!Objects.equals(team.getOwner().getUsername(), owner.getUsername())) {
+        if (!Objects.equals(team.getOwner().getUsername(), loginUser.getUsername())) {
             throw new AccessDeniedException("팀장이 아닙니다. 권한이 없습니다.");
         }
 
-        teamMember.update(user, team, dto.getGradeName());
+        teamMember.update(dto.getGradeName());
     }
 
     /**
