@@ -16,7 +16,6 @@ public class GoalDto {
     private Integer goalCount;
     private Integer actionCount;
     private Integer currentWeeks;
-    private Long teamId;
 
     private DailyCheckDto dailyCheck;
 

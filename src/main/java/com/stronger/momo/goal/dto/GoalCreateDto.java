@@ -20,9 +20,4 @@ public class GoalCreateDto {
     private Integer goalCount;
     private Long planId;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate startDate;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate endDate;
-
 }

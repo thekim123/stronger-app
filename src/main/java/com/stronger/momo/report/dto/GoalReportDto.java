@@ -1,5 +1,6 @@
-package com.stronger.momo.goal.dto;
+package com.stronger.momo.report.dto;
 
+import com.stronger.momo.goal.dto.DailyCheckDto;
 import com.stronger.momo.goal.entity.DailyCheck;
 import com.stronger.momo.goal.entity.Goal;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoalAnalisysDto {
+public class GoalReportDto {
 
     private Long id;
     private String title;
@@ -26,7 +27,7 @@ public class GoalAnalisysDto {
 
     private List<DailyCheckDto> dailyCheckDtoList;
 
-    public static GoalAnalisysDto mapDailyCheck(Goal goal, List<DailyCheck> dailyCheckList) {
+    public static GoalReportDto mapDailyCheck(Goal goal, List<DailyCheck> dailyCheckList) {
         List<DailyCheckDto> dtoList = dailyCheckList.stream()
                 .map(dailyCheck -> DailyCheckDto.builder()
                         .id(dailyCheck.getId())
@@ -35,7 +36,7 @@ public class GoalAnalisysDto {
                         .build())
                 .collect(Collectors.toList());
 
-        return GoalAnalisysDto.builder()
+        return GoalReportDto.builder()
                 .id(goal.getId())
                 .title(goal.getTitle())
                 .content(goal.getContent())

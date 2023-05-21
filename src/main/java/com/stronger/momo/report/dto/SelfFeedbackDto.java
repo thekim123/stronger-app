@@ -1,6 +1,6 @@
-package com.stronger.momo.goal.dto;
+package com.stronger.momo.report.dto;
 
-import com.stronger.momo.goal.entity.SelfFeedback;
+import com.stronger.momo.report.entity.SelfFeedback;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

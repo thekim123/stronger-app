@@ -1,8 +1,8 @@
-package com.stronger.momo.goal.entity;
+package com.stronger.momo.report.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.goal.dto.SelfFeedbackDto;
-import com.stronger.momo.team.entity.TeamMember;
+import com.stronger.momo.goal.entity.Plan;
+import com.stronger.momo.report.dto.SelfFeedbackDto;
 import lombok.*;
 
 import javax.persistence.*;

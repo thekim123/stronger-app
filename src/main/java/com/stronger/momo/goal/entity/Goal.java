@@ -35,14 +35,16 @@ public class Goal extends BaseTimeEntity {
 
     // 목표 횟수
     @Column(nullable = false)
-    private Integer goalCount;
+    @Builder.Default
+    private Integer goalCount = 0;
 
     // 실천 횟수
     @Column
-    private Integer actionCount;
+    @Builder.Default
+    private Integer actionCount = 0;
 
-    //TODO: 지워도될듯?
-    private Integer currentWeeks;
+    @Builder.Default
+    private Integer currentWeeks = 0;
 
     @JoinColumn(name = "planId")
     @ManyToOne
