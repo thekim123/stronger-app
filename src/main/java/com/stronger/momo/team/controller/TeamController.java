@@ -22,6 +22,13 @@ public class TeamController {
 
     private final TeamService teamService;
 
+
+    @GetMapping("/all-of-my-list")
+    public ResponseEntity<?> retrieveTeamList(Authentication authentication) {
+        List<TeamMemberDto> teamMemberList = teamService.retrieveTeamList(authentication);
+        return ResponseEntity.status(HttpStatus.OK).body(teamMemberList);
+    }
+
     /**
      * @param authentication 로그인 인증 정보
      * @param memberId       그룹장 id

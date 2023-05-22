@@ -30,20 +30,30 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final UserRepository userRepository;
+
+
+    @Transactional(readOnly = true)
+    public List<TeamMemberDto> retrieveTeamList(Authentication authentication) {
+        User loginUser = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        List<TeamMember> teamMemberList = teamMemberRepository.findByUser(loginUser);
+        return teamMemberList.stream()
+                .map(TeamMemberDto::from)
+                .collect(Collectors.toList());
+    }
+
+
+    //TODO 그룹장 권한조회 해야함.
 
     /**
-     * 그룹원 목록 조회 서비스 로직
-     *
      * @param authentication 로그인 인증 정보
      * @param memberId       그룹 id
      * @return 그룹원 목록 dto
      * @throws AccessDeniedException   권한 없음 예외
      * @throws EntityNotFoundException 그룹 없음 예외
+     * @apiNote 그룹원 목록 조회 서비스 로직
      */
     @Transactional(readOnly = true)
     public List<TeamMemberDto> getTeamMemberList(Authentication authentication, Long memberId) throws AccessDeniedException, EntityNotFoundException {
-        User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
         TeamMember member = teamMemberRepository.findById(memberId).orElseThrow(EntityNotFoundException::new);
 
         List<TeamMember> teamMemberList = teamMemberRepository.findByTeam(member.getTeam());

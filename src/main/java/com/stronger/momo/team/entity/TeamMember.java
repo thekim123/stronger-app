@@ -1,5 +1,6 @@
 package com.stronger.momo.team.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.goal.entity.Plan;
@@ -43,6 +44,7 @@ public class TeamMember extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @JsonIgnoreProperties({"member"})
     @OneToMany(mappedBy = "member")
     @Builder.Default
     private List<Plan> planList = new ArrayList<>();

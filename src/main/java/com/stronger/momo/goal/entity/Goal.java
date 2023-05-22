@@ -46,6 +46,7 @@ public class Goal extends BaseTimeEntity {
     @Builder.Default
     private Integer currentWeeks = 0;
 
+    @JsonIgnoreProperties({"goalList", "member"})
     @JoinColumn(name = "planId")
     @ManyToOne
     private Plan plan;

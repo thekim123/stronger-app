@@ -84,7 +84,7 @@ public class GoalService {
         });
         List<Plan> planList = planRepository.findByMember(member);
 
-        return planList.stream().map(PlanDto::fromPlan).collect(Collectors.toList());
+        return planList.stream().map(PlanDto::from).collect(Collectors.toList());
     }
 
 

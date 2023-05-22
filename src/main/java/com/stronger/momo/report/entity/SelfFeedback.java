@@ -41,16 +41,4 @@ public class SelfFeedback extends BaseTimeEntity {
         this.measure = dto.getMeasure();
     }
 
-    public SelfFeedbackDto toDto() {
-        if (id == null) {
-            return new SelfFeedbackDto();
-        }
-
-        return SelfFeedbackDto.builder()
-                .id(id)
-                .reason(reason)
-                .measure(measure)
-                .checkDate(checkDate)
-                .build();
-    }
 }

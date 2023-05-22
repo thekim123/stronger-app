@@ -1,12 +1,13 @@
 package com.stronger.momo.team.dto;
 
+import com.stronger.momo.goal.dto.PlanDto;
 import com.stronger.momo.team.entity.TeamMember;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * 직책 dto
- */
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Data
 @Builder
 public class TeamMemberDto {
@@ -18,7 +19,14 @@ public class TeamMemberDto {
     private Long userId;
     private String nickname;
 
+    List<PlanDto> planList;
+
+
     public static TeamMemberDto from(TeamMember teamMember) {
+        List<PlanDto> planDtoList = teamMember.getPlanList().stream()
+                .map(PlanDto::from)
+                .collect(Collectors.toList());
+
         return TeamMemberDto.builder()
                 .id(teamMember.getId())
                 .gradeName(teamMember.getGrade().name())
@@ -26,6 +34,7 @@ public class TeamMemberDto {
                 .teamName(teamMember.getTeam().getName())
                 .userId(teamMember.getUser().getId())
                 .nickname(teamMember.getUser().getNickname())
+                .planList(planDtoList)
                 .build();
     }
 
