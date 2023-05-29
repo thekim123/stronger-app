@@ -9,7 +9,6 @@ import com.stronger.momo.team.entity.Grade;
 import com.stronger.momo.team.repository.TeamMemberRepository;
 import com.stronger.momo.user.entity.User;
 import com.stronger.momo.team.repository.TeamRepository;
-import com.stronger.momo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,9 @@ public class TeamService {
     @Transactional(readOnly = true)
     public List<TeamMemberDto> retrieveTeamList(Authentication authentication) {
         User loginUser = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        List<TeamMember> teamMemberList = teamMemberRepository.findByUser(loginUser);
+        List<TeamMember> teamMemberList =
+                teamMemberRepository.findByUser(loginUser);
+        System.out.println(teamMemberList);
         return teamMemberList.stream()
                 .map(TeamMemberDto::from)
                 .collect(Collectors.toList());

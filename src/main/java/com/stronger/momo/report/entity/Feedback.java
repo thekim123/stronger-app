@@ -50,7 +50,7 @@ public class Feedback extends BaseTimeEntity {
         return FeedbackDto.builder()
                 .id(id)
                 .comment(comment)
-                .checkDate(checkDate.toString())
+                .checkDate(checkDate)
                 .build();
     }
 }

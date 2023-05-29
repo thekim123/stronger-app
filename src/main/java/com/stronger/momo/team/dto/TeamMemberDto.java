@@ -8,6 +8,7 @@ import lombok.Data;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Data
 @Builder
 public class TeamMemberDto {
@@ -18,14 +19,13 @@ public class TeamMemberDto {
     private String teamName;
     private Long userId;
     private String nickname;
-
-    List<PlanDto> planList;
+    private List<PlanDto> planDtoList;
 
 
     public static TeamMemberDto from(TeamMember teamMember) {
-        List<PlanDto> planDtoList = teamMember.getPlanList().stream()
-                .map(PlanDto::from)
-                .collect(Collectors.toList());
+        List<PlanDto> planDtoList =
+                teamMember.getPlanList().stream()
+                        .map(PlanDto::from).collect(Collectors.toList());
 
         return TeamMemberDto.builder()
                 .id(teamMember.getId())
@@ -34,7 +34,7 @@ public class TeamMemberDto {
                 .teamName(teamMember.getTeam().getName())
                 .userId(teamMember.getUser().getId())
                 .nickname(teamMember.getUser().getNickname())
-                .planList(planDtoList)
+                .planDtoList(planDtoList)
                 .build();
     }
 

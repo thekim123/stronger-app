@@ -15,8 +15,6 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "daily_check")
-@ToString(exclude = {"goal"})
-@JsonIgnoreProperties({"goal"})
 public class DailyCheck extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

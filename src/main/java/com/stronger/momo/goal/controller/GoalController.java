@@ -22,16 +22,14 @@ public class GoalController {
 
     /**
      * @param authentication 유저 인증 정보
-     * @param teamId         팀 id
      * @return 해당 팀에서 세운 목표 리스트
      * @apiNote 팀별 todolist 조회 api
      */
-    @GetMapping("/todo-list/{teamId}")
+    @GetMapping("/todo-list")
     public ResponseEntity<?> getTodoList(
-            Authentication authentication
-            , @PathVariable Long teamId) {
+            Authentication authentication) {
         List<GoalDto> todoList =
-                goalService.getTodoList(authentication, teamId);
+                goalService.getTodoList(authentication);
         return ResponseEntity.status(HttpStatus.OK).body(todoList);
     }
 

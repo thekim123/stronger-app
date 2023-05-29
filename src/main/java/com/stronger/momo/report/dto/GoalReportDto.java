@@ -39,9 +39,7 @@ public class GoalReportDto {
         return GoalReportDto.builder()
                 .id(goal.getId())
                 .title(goal.getTitle())
-                .content(goal.getContent())
                 .goalCount(goal.getGoalCount())
-                .actionCount(goal.getActionCount())
                 .dailyCheckDtoList(dtoList)
                 .build();
     }

@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 /**
@@ -23,11 +22,15 @@ public class TeamController {
     private final TeamService teamService;
 
 
-    @GetMapping("/all-of-my-list")
-    public ResponseEntity<?> retrieveTeamList(Authentication authentication) {
-        List<TeamMemberDto> teamMemberList = teamService.retrieveTeamList(authentication);
-        return ResponseEntity.status(HttpStatus.OK).body(teamMemberList);
+    @GetMapping("/member/list")
+    public ResponseEntity<?> retrieveTeamList(
+            Authentication authentication) {
+        List<TeamMemberDto> teamMemberList = teamService
+                .retrieveTeamList(authentication);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(teamMemberList);
     }
+
 
     /**
      * @param authentication 로그인 인증 정보
@@ -36,8 +39,11 @@ public class TeamController {
      * @apiNote 그룹원 목록 조회 API
      */
     @GetMapping("/owner/{memberId}")
-    public ResponseEntity<?> getTeamMemberList(Authentication authentication, @PathVariable Long memberId) {
-        List<TeamMemberDto> dtoList = teamService.getTeamMemberList(authentication, memberId);
+    public ResponseEntity<?> getTeamMemberList(
+            Authentication authentication,
+            @PathVariable Long memberId) {
+        List<TeamMemberDto> dtoList =
+                teamService.getTeamMemberList(authentication, memberId);
         return ResponseEntity.status(HttpStatus.OK).body(dtoList);
     }
 
@@ -50,7 +56,8 @@ public class TeamController {
     @GetMapping("/my-list")
     public ResponseEntity<?> getMyTeamList(
             Authentication authentication) {
-        List<TeamMemberDto> myList = teamService.getMyTeamList(authentication);
+        List<TeamMemberDto> myList =
+                teamService.getMyTeamList(authentication);
         return ResponseEntity.status(HttpStatus.OK).body(myList);
     }
 
@@ -119,11 +126,11 @@ public class TeamController {
     @PostMapping("/join/{teamId}")
     public ResponseEntity<?> joinGroup(
             Authentication authentication
-            , @PathVariable Long teamId
-            , String introduce) {
+            , @PathVariable Long teamId) {
         teamService.joinTeam(authentication, teamId);
         return ResponseEntity
-                .status(HttpStatus.CREATED).body("팀 가입 신청이 완료되었습니다.");
+                .status(HttpStatus.CREATED)
+                .body("팀 가입 신청이 완료되었습니다.");
     }
 
 
@@ -154,13 +161,17 @@ public class TeamController {
     }
 
     @DeleteMapping("/leave/{memberId}")
-    public ResponseEntity<?> leaveGroup(Authentication authentication, @PathVariable Long memberId) {
+    public ResponseEntity<?> leaveGroup(
+            Authentication authentication,
+            @PathVariable Long memberId) {
         teamService.leaveTeam(authentication, memberId);
         return ResponseEntity.status(HttpStatus.OK).body("팀 탈퇴가 완료되었습니다.");
     }
 
     @DeleteMapping("/ban")
-    public ResponseEntity<?> banUser(Authentication authentication, @RequestBody TeamMemberDto dto) throws AccessDeniedException {
+    public ResponseEntity<?> banUser(
+            Authentication authentication,
+            @RequestBody TeamMemberDto dto) {
         teamService.banUser(authentication, dto);
         return ResponseEntity.status(HttpStatus.OK).body("팀 회원 추방이 완료되었습니다.");
     }

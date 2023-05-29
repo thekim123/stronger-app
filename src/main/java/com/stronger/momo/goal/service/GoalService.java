@@ -19,6 +19,7 @@ import org.springframework.security.access.AccessDeniedException;
 import javax.persistence.EntityNotFoundException;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,7 +32,6 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final DailyCheckRepository dailyCheckRepository;
     private final TeamMemberRepository teamMemberRepository;
-    private final TeamRepository teamRepository;
     private final PlanRepository planRepository;
 
 
@@ -42,13 +42,21 @@ public class GoalService {
      * 로그인 유저 -> 로그인 유저 = 팀 멤버 -> 팀멤버로 가지고 있는 모든 goal
      */
     @Transactional(readOnly = true)
-    public List<GoalDto> getTodoList(Authentication authentication, Long teamId) {
+    public List<GoalDto> getTodoList(Authentication authentication) {
         User loginUser = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        Team team = teamRepository.findById(teamId).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 팀이 존재하지 않습니다.");
-        });
-        TeamMember member = getTeamMemberForPlan(loginUser, team);
-        return getGoalsForPlan(member);
+        List<Goal> goalList = goalRepository.getTodoList(loginUser);
+        List<DailyCheck> dailyChecks = dailyCheckRepository.findByGoalInAndCheckDate(goalList, LocalDate.now());
+        List<GoalDto> result = goalList.stream().map(GoalDto::fromGoalForTodolist).collect(Collectors.toList());
+
+        for (GoalDto goalDto : result) {
+            for (DailyCheck dailyCheck : dailyChecks) {
+                if (goalDto.getId().equals(dailyCheck.getGoal().getId())) {
+                    goalDto.setDailyCheck(dailyCheck.toDto());
+                }
+            }
+        }
+
+        return result;
     }
 
     public TeamMember getTeamMemberForPlan(User user, Team team) {
@@ -98,28 +106,32 @@ public class GoalService {
      */
     @Transactional
     public GoalDto createGoal(Authentication authentication, GoalCreateDto dto) {
+        System.out.println(dto);
         User loginUser = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        TeamMember member = checkPlanExists(dto.getPlanId());
+        Plan plan = planRepository.findById(dto.getPlanId()).orElseThrow(() -> {
+            throw new EntityNotFoundException("해당 계획이 존재하지 않습니다");
+        });
 
-        if (!isPlanOwner(loginUser, member)) {
-            throw new AccessDeniedException("자신의 계획에만 목표를 작성할 수 있습니다");
-        }
-        if (isGradePending(member)) {
-            throw new AccessDeniedException("대기자는 목표를 작성할 수 없습니다");
-        }
-
-        Plan plan = planRepository.findById(dto.getPlanId())
-                .orElseThrow(() -> new EntityNotFoundException("해당 계획이 존재하지 않습니다"));
+        judgeCanCreateGoal(loginUser, plan);
 
         Goal goal = Goal.builder()
                 .title(dto.getTitle())
-                .content(dto.getContent())
                 .goalCount(dto.getGoalCount())
                 .plan(plan)
                 .build();
 
         Goal insertedGoal = goalRepository.save(goal);
         return GoalDto.fromGoal(insertedGoal);
+    }
+
+    private void judgeCanCreateGoal(User loginUser, Plan plan) {
+        TeamMember planMember = plan.getMember();
+        if (!isPlanOwner(loginUser, planMember)) {
+            throw new AccessDeniedException("자신의 계획에만 목표를 작성할 수 있습니다");
+        }
+        if (isGradePending(planMember)) {
+            throw new AccessDeniedException("대기자는 목표를 작성할 수 없습니다");
+        }
     }
 
     public boolean isPlanOwner(User loginUser, TeamMember member) {

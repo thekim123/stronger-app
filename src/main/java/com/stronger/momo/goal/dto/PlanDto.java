@@ -1,5 +1,6 @@
 package com.stronger.momo.goal.dto;
 
+import com.stronger.momo.goal.entity.DailyCheck;
 import com.stronger.momo.goal.entity.Plan;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,32 @@ public class PlanDto {
                 .goalList(plan.getGoalList().stream()
                         .map(GoalDto::fromGoal)
                         .collect(Collectors.toList()))
+                .build();
+    }
+
+    public static PlanDto whenMakeReport(Plan plan, List<DailyCheck> dailyCheckList) {
+        return PlanDto.builder()
+                .id(plan.getId())
+                .title(plan.getTitle())
+                .description(plan.getDescription())
+                .memberId(plan.getMember().getId())
+                .goalList(plan.getGoalList().stream()
+                        .map(goal -> GoalDto.fromGoalWhenMakeReport(dailyCheckList, goal))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    public static PlanDto toDtoWhenMakeList(Plan plan) {
+        List<GoalDto> goalDtoList = plan.getGoalList().stream()
+                .map(GoalDto::fromGoal)
+                .collect(Collectors.toList());
+
+        return PlanDto.builder()
+                .id(plan.getId())
+                .title(plan.getTitle())
+                .description(plan.getDescription())
+                .goalList(goalDtoList)
+                .memberId(plan.getMember().getId())
                 .build();
     }
 }

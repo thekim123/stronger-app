@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,7 +17,7 @@ public class FeedbackDto {
     private Long planId;
     private Long userId;
     private String comment;
-    private String checkDate;
+    private LocalDate checkDate;
 
     public static FeedbackDto fromFeedback(Feedback feedback) {
         return FeedbackDto.builder()
@@ -23,7 +25,7 @@ public class FeedbackDto {
                 .userId(feedback.getUser().getId())
                 .planId(feedback.getPlan().getId())
                 .comment(feedback.getComment())
-                .checkDate(feedback.getCheckDate().toString())
+                .checkDate(feedback.getCheckDate())
                 .build();
     }
 

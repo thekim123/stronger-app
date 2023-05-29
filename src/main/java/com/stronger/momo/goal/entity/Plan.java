@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Data
-@ToString
+@ToString(exclude = {"member"})
 public class Plan extends BaseTimeEntity {
 
     @Id
@@ -28,21 +28,21 @@ public class Plan extends BaseTimeEntity {
     private String title;
     private String description;
 
-    @JsonIncludeProperties({"planList"})
+    @JsonIncludeProperties({"id", "planList"})
     @ManyToOne
     @JoinColumn(name = "memberId")
     private TeamMember member;
 
     @JsonIncludeProperties({"plan"})
-    @OneToMany(mappedBy = "plan")
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.REMOVE)
     @Builder.Default
     private List<Goal> goalList = new ArrayList<>();
     @JsonIncludeProperties({"plan"})
-    @OneToMany(mappedBy = "plan")
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.REMOVE)
     @Builder.Default
     private List<SelfFeedback> selfFeedbackList = new ArrayList<>();
     @JsonIncludeProperties({"plan"})
-    @OneToMany(mappedBy = "plan")
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.REMOVE)
     @Builder.Default
     private List<Feedback> feedbackList = new ArrayList<>();
 
@@ -62,6 +62,5 @@ public class Plan extends BaseTimeEntity {
         this.title = dto.getTitle();
         this.description = dto.getDescription();
     }
-
 
 }

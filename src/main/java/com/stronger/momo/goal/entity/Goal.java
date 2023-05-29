@@ -31,17 +31,11 @@ public class Goal extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String title;
-    private String content;
 
     // 목표 횟수
     @Column(nullable = false)
     @Builder.Default
     private Integer goalCount = 0;
-
-    // 실천 횟수
-    @Column
-    @Builder.Default
-    private Integer actionCount = 0;
 
     @Builder.Default
     private Integer currentWeeks = 0;
@@ -62,7 +56,6 @@ public class Goal extends BaseTimeEntity {
     public void update(GoalUpdateDto dto) {
         this.goalCount = dto.getGoalCount();
         this.title = dto.getTitle();
-        this.content = dto.getContent();
     }
 
     public void addDailyCheck(DailyCheck dailyCheck) {

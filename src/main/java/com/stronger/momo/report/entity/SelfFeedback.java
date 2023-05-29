@@ -2,6 +2,7 @@ package com.stronger.momo.report.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.goal.entity.Plan;
+import com.stronger.momo.report.dto.FeedbackDto;
 import com.stronger.momo.report.dto.SelfFeedbackDto;
 import lombok.*;
 
@@ -39,6 +40,19 @@ public class SelfFeedback extends BaseTimeEntity {
     public void update(SelfFeedbackDto dto) {
         this.reason = dto.getReason();
         this.measure = dto.getMeasure();
+    }
+
+    public SelfFeedbackDto toDto() {
+        if (id == null) {
+            return new SelfFeedbackDto();
+        }
+
+        return SelfFeedbackDto.builder()
+                .id(id)
+                .reason(reason)
+                .measure(measure)
+                .checkDate(checkDate)
+                .build();
     }
 
 }
