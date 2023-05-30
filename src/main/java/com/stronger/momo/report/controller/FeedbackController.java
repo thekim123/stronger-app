@@ -21,7 +21,7 @@ public class FeedbackController {
      * @param dto 교관 피드백 작성 dto
      * @apiNote 교관 피드백 작성 api
      */
-    @PostMapping("/feedback")
+    @PostMapping
     public ResponseEntity<?> createFeedback(
             Authentication authentication,
             @RequestBody FeedbackDto dto) {
@@ -54,23 +54,21 @@ public class FeedbackController {
     public ResponseEntity<?> updateFeedback(
             @RequestBody FeedbackDto dto,
             @PathVariable Long memberId) {
-        feedbackService.updateFeedback(dto, memberId);
+        FeedbackDto result = feedbackService.updateFeedback(dto, memberId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body("교관 피드백 수정이 완료되었습니다.");
+                .body(result);
     }
 
 
     /**
-     * @param dto      셀프피드백 작성 dto
-     * @param memberId 계획 id
+     * @param dto 셀프피드백 작성 dto
      * @apiNote 셀프 피드백 작성 api
      */
-    @PostMapping("/{memberId}/self")
+    @PostMapping("/self")
     public ResponseEntity<?> createSelfFeedback(
-            @RequestBody SelfFeedbackDto dto,
-            @PathVariable Long memberId) {
+            @RequestBody SelfFeedbackDto dto) {
         SelfFeedbackDto result = feedbackService
-                .createSelfFeedback(dto, memberId);
+                .createSelfFeedback(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 

@@ -37,16 +37,21 @@ public class GoalDto {
     }
 
     public static GoalDto fromGoalWhenMakeReport(List<DailyCheck> dailyCheckList, Goal goal) {
-        return GoalDto.builder()
+        System.out.println("dailyCheckList = " + dailyCheckList);
+
+        GoalDto result = GoalDto.builder()
                 .id(goal.getId())
                 .title(goal.getTitle())
                 .goalCount(goal.getGoalCount())
                 .currentWeeks(goal.getCurrentWeeks())
                 .planId(goal.getPlan().getId())
-                .dailyCheckList(!dailyCheckList.isEmpty()
-                        ? dailyCheckList.stream().map(DailyCheck::toDto).collect(Collectors.toList())
+                .dailyCheckList(!dailyCheckList.isEmpty() ? dailyCheckList.stream()
+                        .filter(dailyCheck -> dailyCheck.getGoal().getId().equals(goal.getId()) && dailyCheck.isCompleted())
+                        .map(DailyCheck::toDto).collect(Collectors.toList())
                         : new ArrayList<>())
                 .build();
+        System.out.println("result = " + result);
+        return result;
     }
 
     public static GoalDto fromGoalForTodolist(Goal goal) {

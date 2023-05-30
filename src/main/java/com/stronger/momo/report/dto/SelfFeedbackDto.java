@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class SelfFeedbackDto {
     private Long id;
+    private Long planId;
     private String reason;
     private String measure;
     private LocalDate checkDate;
@@ -21,6 +22,7 @@ public class SelfFeedbackDto {
     public static SelfFeedbackDto fromSelfFeedback(SelfFeedback selfFeedback) {
         return SelfFeedbackDto.builder()
                 .id(selfFeedback.getId())
+                .planId(selfFeedback.getPlan().getId())
                 .reason(selfFeedback.getReason())
                 .measure(selfFeedback.getMeasure())
                 .checkDate(selfFeedback.getCheckDate())

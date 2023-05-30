@@ -85,7 +85,7 @@ public class FeedbackService {
      * @throws AccessDeniedException 교관 피드백의 소유자가 아닌 경우
      */
     @Transactional
-    public void updateFeedback(FeedbackDto dto, Long memberId) throws AccessDeniedException {
+    public FeedbackDto updateFeedback(FeedbackDto dto, Long memberId) throws AccessDeniedException {
         TeamMember member = teamMemberRepository.findById(memberId).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀원이 DB에 없습니다.");
         });
@@ -94,18 +94,19 @@ public class FeedbackService {
             throw new EntityNotFoundException("해당 교관 피드백이 존재하지 않습니다");
         });
         entity.update(dto);
+        return FeedbackDto.fromFeedback(entity);
+
     }
 
 
     /**
      * 셀프 피드백 작성 서비스 메서드
      *
-     * @param dto    셀프피드백 작성 dto
-     * @param planId 계획 id
+     * @param dto 셀프피드백 작성 dto
      */
     @Transactional
-    public SelfFeedbackDto createSelfFeedback(SelfFeedbackDto dto, Long planId) {
-        Plan plan = planRepository.findById(planId).orElseThrow(() -> {
+    public SelfFeedbackDto createSelfFeedback(SelfFeedbackDto dto) {
+        Plan plan = planRepository.findById(dto.getPlanId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 팀원이 DB에 없습니다.");
         });
 
