@@ -6,6 +6,8 @@ import com.stronger.momo.user.entity.User;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SNS Entity
@@ -30,6 +32,10 @@ public class Sns extends BaseTimeEntity {
     @JoinColumn(name = "writerId")
     @ManyToOne
     private User writer;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "snsId", cascade = CascadeType.ALL)
+    private List<Comment> comment = new ArrayList<>();
 
     public void updateSns(SnsDto dto) {
         this.title = dto.getTitle();

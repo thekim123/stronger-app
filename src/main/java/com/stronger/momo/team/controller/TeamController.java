@@ -1,5 +1,6 @@
 package com.stronger.momo.team.controller;
 
+import com.stronger.momo.team.dto.TeamCreateDto;
 import com.stronger.momo.team.dto.TeamDto;
 import com.stronger.momo.team.dto.TeamMemberDto;
 import com.stronger.momo.team.service.TeamService;
@@ -55,9 +56,10 @@ public class TeamController {
      */
     @GetMapping("/my-list")
     public ResponseEntity<?> getMyTeamList(
-            Authentication authentication) {
+            Authentication authentication,
+            @RequestParam(value = "type", required = false) String type) {
         List<TeamMemberDto> myList =
-                teamService.getMyTeamList(authentication);
+                teamService.getMyTeamList(authentication, type);
         return ResponseEntity.status(HttpStatus.OK).body(myList);
     }
 
@@ -67,9 +69,10 @@ public class TeamController {
      * @return 팀 목록 dto
      */
     @GetMapping("/list")
-    public ResponseEntity<?> getPublicTeamList() {
+    public ResponseEntity<?> getPublicTeamList(Authentication authentication) {
+        List<TeamDto> teamList = teamService.getPublicTeamList(authentication);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(teamService.getPublicTeamList());
+                .body(teamList);
     }
 
     /**
@@ -80,7 +83,7 @@ public class TeamController {
     @PostMapping("/create")
     public ResponseEntity<?> createGroup(
             Authentication authentication
-            , @RequestBody TeamDto teamDto) {
+            , @RequestBody TeamCreateDto teamDto) {
         String teamCode = teamService
                 .createTeam(authentication, teamDto);
         return ResponseEntity.status(HttpStatus.CREATED)

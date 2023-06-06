@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @Builder
@@ -15,8 +16,8 @@ public class TeamDto {
     private String teamName;
     private String description;
     private String teamCode;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private String startDate;
+    private String endDate;
     private boolean isOpen;
 
 
@@ -29,11 +30,14 @@ public class TeamDto {
      * @since version 1.0
      */
     public static TeamDto from(Team team) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd");
         return TeamDto.builder()
                 .id(team.getId())
                 .teamName(team.getName())
                 .teamCode(team.getTeamCode())
                 .description(team.getDescription())
+                .startDate(team.getStartDate().format(formatter))
+                .endDate(team.getEndDate().format(formatter))
                 .build();
     }
 

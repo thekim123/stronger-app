@@ -9,9 +9,5 @@ import java.util.Optional;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
 
-    List<Team> findAllByIsOpenTrue();
-
-    List<Team> findByOwner(User user);
-
     Optional<Team> findByTeamCode(String teamCode);
 }

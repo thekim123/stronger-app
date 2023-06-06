@@ -1,6 +1,7 @@
 package com.stronger.momo.team.service;
 
 import com.stronger.momo.config.security.PrincipalDetails;
+import com.stronger.momo.team.dto.TeamCreateDto;
 import com.stronger.momo.team.dto.TeamDto;
 import com.stronger.momo.team.dto.TeamMemberDto;
 import com.stronger.momo.team.entity.Team;
@@ -15,8 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceContext;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,6 +34,9 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
     @Transactional(readOnly = true)
@@ -71,14 +79,28 @@ public class TeamService {
      * @apiNote 내 그룹 목록 조회 서비스 로직
      */
     @Transactional(readOnly = true)
-    public List<TeamMemberDto> getMyTeamList(Authentication authentication) {
+    public List<TeamMemberDto> getMyTeamList(Authentication authentication, String type) {
         User user = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        List<TeamMemberDto> teamDtoList = new ArrayList<>();
 
+        List<TeamMemberDto> teamDtoList;
         List<TeamMember> teamMemberList = teamMemberRepository.findByUser(user);
-        teamMemberList.stream()
-                .map(TeamMemberDto::from)
-                .forEach(teamDtoList::add);
+        if (type != null) {
+            teamDtoList = teamMemberList.stream()
+                    .filter(teamMember -> {
+                        if (type.equals("MEMBER")) {
+                            return Objects.equals(teamMember.getGrade(), Grade.MEMBER)
+                                    || Objects.equals(teamMember.getGrade(), Grade.MANAGER);
+                        } else {
+                            return Objects.equals(teamMember.getGrade(), Grade.valueOf(type));
+                        }
+                    })
+                    .map(TeamMemberDto::from)
+                    .collect(Collectors.toList());
+        } else {
+            teamDtoList = teamMemberList.stream()
+                    .map(TeamMemberDto::from)
+                    .collect(Collectors.toList());
+        }
         return teamDtoList;
     }
 
@@ -90,9 +112,18 @@ public class TeamService {
      * @since version 1.0
      */
     @Transactional(readOnly = true)
-    public List<TeamDto> getPublicTeamList() {
-        List<Team> teamList = teamRepository.findAllByIsOpenTrue();
+    public List<TeamDto> getPublicTeamList(Authentication authentication) {
+        User loginUser = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+        List<TeamMember> joinedList = teamMemberRepository.findByUser(loginUser);
+
+        LocalDate today = LocalDate.now();
+        String jpql = "SELECT t FROM Team t WHERE isOpen=true and t.endDate > :today";
+        List<Team> teamList = entityManager.createQuery(jpql, Team.class)
+                .setParameter("today", today)
+                .getResultList();
+
         return teamList.stream()
+                .filter(team -> joinedList.stream().noneMatch(teamMember -> teamMember.getTeam().equals(team)))
                 .map(TeamDto::from)
                 .collect(Collectors.toList());
     }
@@ -104,10 +135,11 @@ public class TeamService {
      * @param teamDto        그룹 생성 dto
      */
     @Transactional
-    public String createTeam(Authentication authentication, TeamDto teamDto) {
+    public String createTeam(Authentication authentication, TeamCreateDto teamDto) {
         UUID uuid = UUID.randomUUID();
         String teamCode = uuid.toString();
         User owner = ((PrincipalDetails) authentication.getPrincipal()).getUser();
+
         Team team = Team.builder()
                 .name(teamDto.getTeamName())
                 .description(teamDto.getDescription())

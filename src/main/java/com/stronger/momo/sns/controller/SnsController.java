@@ -2,8 +2,12 @@ package com.stronger.momo.sns.controller;
 
 import com.stronger.momo.sns.dto.CommentDto;
 import com.stronger.momo.sns.dto.SnsDto;
+import com.stronger.momo.sns.entity.Sns;
 import com.stronger.momo.sns.service.SnsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,6 +20,14 @@ import java.nio.file.AccessDeniedException;
 @RequestMapping("api/sns")
 public class SnsController {
     private final SnsService snsService;
+
+
+    @GetMapping("/list")
+    public ResponseEntity<?> getSnsList(Authentication authentication
+            , @PageableDefault(size = 5) Pageable pageable) {
+        Page<Sns> snsList = snsService.getSnsList(authentication, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(snsList);
+    }
 
     @PostMapping("/write")
     public ResponseEntity<?> writeSns(Authentication authentication, @RequestBody SnsDto dto) {

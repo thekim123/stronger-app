@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Data
-@ToString(exclude = {"member"})
+@ToString(exclude = {"member", "goalList", "selfFeedbackList", "feedbackList"})
 public class Plan extends BaseTimeEntity {
 
     @Id

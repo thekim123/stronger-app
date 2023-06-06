@@ -9,6 +9,8 @@ import com.stronger.momo.sns.repository.CommentRepository;
 import com.stronger.momo.sns.repository.SnsRepository;
 import com.stronger.momo.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,13 @@ public class SnsService {
 
     private final SnsRepository snsRepository;
     private final CommentRepository commentRepository;
+
+    @Transactional(readOnly = true)
+    public Page<Sns> getSnsList(Authentication authentication, Pageable pageable) {
+        Long loginUserId = ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
+        Page<Sns> snsList = snsRepository.findMyFeed(loginUserId, pageable);
+        return snsList;
+    }
 
     @Transactional
     public void writeSns(Authentication authentication, SnsDto dto) {
@@ -110,6 +119,5 @@ public class SnsService {
         comment.updateComment(dto);
         commentRepository.save(comment);
     }
-
 
 }
