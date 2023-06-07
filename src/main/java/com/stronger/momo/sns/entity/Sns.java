@@ -34,7 +34,7 @@ public class Sns extends BaseTimeEntity {
     private User writer;
 
     @Builder.Default
-    @OneToMany(mappedBy = "snsId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "sns", cascade = CascadeType.ALL)
     private List<Comment> comment = new ArrayList<>();
 
     public void updateSns(SnsDto dto) {
