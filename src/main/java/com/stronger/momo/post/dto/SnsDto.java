@@ -1,4 +1,4 @@
-package com.stronger.momo.sns.dto;
+package com.stronger.momo.post.dto;
 
 import lombok.Data;
 

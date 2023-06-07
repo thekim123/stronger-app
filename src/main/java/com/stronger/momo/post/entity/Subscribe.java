@@ -1,4 +1,4 @@
-package com.stronger.momo.sns.entity;
+package com.stronger.momo.post.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.user.entity.User;

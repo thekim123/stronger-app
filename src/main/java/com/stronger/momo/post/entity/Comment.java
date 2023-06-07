@@ -1,7 +1,9 @@
-package com.stronger.momo.sns.entity;
+package com.stronger.momo.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.sns.dto.CommentDto;
+import com.stronger.momo.post.dto.CommentDto;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
@@ -17,6 +19,7 @@ import javax.persistence.*;
 @Builder
 @Entity(name = "Comment")
 @Table(name = "comment")
+@JsonIgnoreProperties({"post"})
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -25,9 +28,10 @@ public class Comment extends BaseTimeEntity {
 
     private String comment;
     @ManyToOne
-    @JoinColumn(name = "snsId")
-    private Sns sns;
+    @JoinColumn(name = "postId")
+    private Post post;
     @ManyToOne
+    @JsonIncludeProperties({"id", "nickname"})
     private User writer;
 
     /**

@@ -1,7 +1,7 @@
-package com.stronger.momo.sns.entity;
+package com.stronger.momo.post.entity;
 
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.sns.dto.SnsDto;
+import com.stronger.momo.post.dto.SnsDto;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
@@ -14,13 +14,13 @@ import java.util.List;
  * 계획 실천 중 공유할 때 사용
  */
 @EqualsAndHashCode(callSuper = true)
-@Entity(name = "Sns")
-@Table(name = "sns")
+@Entity(name = "Post")
+@Table(name = "post")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data
-public class Sns extends BaseTimeEntity {
+public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +34,8 @@ public class Sns extends BaseTimeEntity {
     private User writer;
 
     @Builder.Default
-    @OneToMany(mappedBy = "sns", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "post", cascade = CascadeType.ALL)
+    @OrderBy("id DESC")
     private List<Comment> comment = new ArrayList<>();
 
     public void updateSns(SnsDto dto) {

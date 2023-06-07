@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
-import com.stronger.momo.sns.entity.Sns;
+import com.stronger.momo.post.entity.Post;
 import com.stronger.momo.user.dto.UserDto;
 import lombok.*;
 
@@ -19,8 +19,8 @@ import java.util.List;
 @Data
 @Builder
 @Table(name = "user")
-@ToString(exclude ={ "teamList", "teamMemberList", "snsList"})
-@JsonIgnoreProperties({"teamList", "teamMemberList", "snsList"})
+@ToString(exclude ={ "teamList", "teamMemberList", "postList"})
+@JsonIgnoreProperties({"teamList", "teamMemberList", "postList"})
 public class User extends BaseTimeEntity {
 
     @Id
@@ -47,7 +47,7 @@ public class User extends BaseTimeEntity {
     private List<TeamMember> teamMemberList;
 
     @OneToMany(mappedBy = "writer")
-    private List<Sns> snsList;
+    private List<Post> postList;
 
     public void update(UserDto dto, String encPassword) {
         this.nickname = dto.getNickname();
