@@ -26,7 +26,7 @@ public class CommentService {
     @Transactional
     public void writeComment(Authentication authentication, CommentDto dto) {
         User writer = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        Post post = postRepository.findById(dto.getSnsId()).orElseThrow(() -> {
+        Post post = postRepository.findById(dto.getPostId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 sns 가 존재하지 않습니다.");
         });
 
@@ -50,7 +50,8 @@ public class CommentService {
             throw new AccessDeniedException("댓글 작성자만이 삭제할 수 있습니다.");
         }
 
-        commentRepository.delete(comment);
+        commentRepository.deleteById(comment.getId());
+        commentRepository.flush();
     }
 
     @Transactional

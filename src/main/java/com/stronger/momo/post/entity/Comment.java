@@ -27,10 +27,10 @@ public class Comment extends BaseTimeEntity {
     private Long id;
 
     private String comment;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "postId")
     private Post post;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JsonIncludeProperties({"id", "nickname"})
     private User writer;
 

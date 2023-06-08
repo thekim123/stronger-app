@@ -34,7 +34,7 @@ public class Post extends BaseTimeEntity {
     private User writer;
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @OrderBy("id DESC")
     private List<Comment> comment = new ArrayList<>();
 
