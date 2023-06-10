@@ -1,7 +1,8 @@
 package com.stronger.momo.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.post.dto.SnsDto;
+import com.stronger.momo.post.dto.SnsCreateDto;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
@@ -30,7 +31,8 @@ public class Post extends BaseTimeEntity {
     private String content;
 
     @JoinColumn(name = "writerId")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"password"})
     private User writer;
 
     @Builder.Default
@@ -38,7 +40,16 @@ public class Post extends BaseTimeEntity {
     @OrderBy("id DESC")
     private List<Comment> comment = new ArrayList<>();
 
-    public void updateSns(SnsDto dto) {
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Likes> likes = new ArrayList<>();
+
+    @Transient
+    private boolean likeState;
+    @Transient
+    private int likeCount;
+
+    public void updateSns(SnsCreateDto dto) {
         this.title = dto.getTitle();
         this.content = dto.getContent();
     }

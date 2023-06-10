@@ -35,6 +35,4 @@ public class Subscribe extends BaseTimeEntity {
     @ManyToOne
     private User toUser;
 
-    private LocalDateTime createDate;
-
 }

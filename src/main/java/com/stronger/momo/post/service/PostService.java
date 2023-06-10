@@ -1,9 +1,8 @@
 package com.stronger.momo.post.service;
 
 import com.stronger.momo.config.security.PrincipalDetails;
-import com.stronger.momo.post.dto.SnsDto;
+import com.stronger.momo.post.dto.SnsCreateDto;
 import com.stronger.momo.post.entity.Post;
-import com.stronger.momo.post.repository.CommentRepository;
 import com.stronger.momo.post.repository.PostRepository;
 import com.stronger.momo.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +21,26 @@ import java.util.Objects;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
 
     @Transactional(readOnly = true)
     public Page<Post> getSnsList(Authentication authentication, Pageable pageable) {
         Long loginUserId = ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
         Page<Post> postList = postRepository.findMyFeed(loginUserId, pageable);
+
+        postList.forEach(post -> {
+            post.setLikeCount(post.getLikes().size());
+            post.getLikes().forEach(like -> {
+                if (Objects.equals(like.getUser().getId(), loginUserId)) {
+                    post.setLikeState(true);
+                }
+            });
+        });
+
         return postList;
     }
 
     @Transactional
-    public void writePost(Authentication authentication, SnsDto dto) {
+    public void writePost(Authentication authentication, SnsCreateDto dto) {
         User writer = ((PrincipalDetails) authentication.getPrincipal()).getUser();
 
         Post post = Post.builder()
@@ -59,7 +67,7 @@ public class PostService {
     }
 
     @Transactional
-    public void updatePost(Authentication authentication, SnsDto dto) throws AccessDeniedException {
+    public void updatePost(Authentication authentication, SnsCreateDto dto) throws AccessDeniedException {
         Post post = postRepository.findById(dto.getId()).orElseThrow(() -> {
             throw new EntityNotFoundException("해당 sns 가 존재하지 않습니다.");
         });

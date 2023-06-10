@@ -3,7 +3,7 @@ package com.stronger.momo.post.dto;
 import lombok.Data;
 
 @Data
-public class SnsDto {
+public class SnsCreateDto {
 
     private Long id;
     private String title;
