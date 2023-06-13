@@ -2,6 +2,7 @@ package com.stronger.momo.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
+import com.stronger.momo.common.aws.AwsS3;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.team.entity.TeamMember;
 import com.stronger.momo.post.entity.Post;
@@ -19,7 +20,7 @@ import java.util.List;
 @Data
 @Builder
 @Table(name = "user")
-@ToString(exclude ={ "teamList", "teamMemberList", "postList"})
+@ToString(exclude = {"teamList", "teamMemberList", "postList"})
 @JsonIgnoreProperties({"teamList", "teamMemberList", "postList"})
 public class User extends BaseTimeEntity {
 
@@ -34,6 +35,9 @@ public class User extends BaseTimeEntity {
     private String nickname;
 
     private String password;
+
+    private String profileImageUrl;
+    private String profileImageKey;
 
     @Column(unique = true)
     private String email;
@@ -54,5 +58,10 @@ public class User extends BaseTimeEntity {
         this.email = dto.getEmail();
         this.birthday = dto.getBirthday();
         this.password = encPassword;
+    }
+
+    public void updateProfileImageUrl(AwsS3 awsS3) {
+        this.profileImageUrl = awsS3.getPath();
+        this.profileImageKey = awsS3.getKey();
     }
 }

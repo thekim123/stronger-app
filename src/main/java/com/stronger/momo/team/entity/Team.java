@@ -37,7 +37,7 @@ public class Team extends BaseTimeEntity {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    @JsonIgnoreProperties({"teamList", "teamMemberList", "snsList"})
+    @JsonIgnoreProperties({"teamList", "teamMemberList", "postList"})
     @JoinColumn(name = "ownerId")
     @ManyToOne
     private User owner;

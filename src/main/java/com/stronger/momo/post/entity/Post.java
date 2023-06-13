@@ -3,6 +3,7 @@ package com.stronger.momo.post.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
 import com.stronger.momo.post.dto.SnsCreateDto;
+import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
 
@@ -34,6 +35,10 @@ public class Post extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JsonIgnoreProperties({"password"})
     private User writer;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "teamId")
+    private Team team;
 
     @Builder.Default
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)

@@ -1,7 +1,6 @@
 package com.stronger.momo.post.service;
 
 import com.stronger.momo.config.security.PrincipalDetails;
-import com.stronger.momo.post.entity.Subscribe;
 import com.stronger.momo.post.repository.SubscribeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

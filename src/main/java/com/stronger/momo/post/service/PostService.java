@@ -4,6 +4,7 @@ import com.stronger.momo.config.security.PrincipalDetails;
 import com.stronger.momo.post.dto.SnsCreateDto;
 import com.stronger.momo.post.entity.Post;
 import com.stronger.momo.post.repository.PostRepository;
+import com.stronger.momo.team.repository.TeamRepository;
 import com.stronger.momo.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -26,6 +28,7 @@ public class PostService {
     public Page<Post> getSnsList(Authentication authentication, Pageable pageable) {
         Long loginUserId = ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
         Page<Post> postList = postRepository.findMyFeed(loginUserId, pageable);
+        System.out.println(postList);
 
         postList.forEach(post -> {
             post.setLikeCount(post.getLikes().size());

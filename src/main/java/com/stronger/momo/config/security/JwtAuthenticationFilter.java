@@ -45,11 +45,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) {
 
-        PrincipalDetails principalDetailis = (PrincipalDetails) authResult.getPrincipal();
-        User loginUser = principalDetailis.getUser();
+        PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
+        User loginUser = principalDetails.getUser();
 
         String jwtToken = JWT.create()
-                .withSubject(principalDetailis.getUsername())
+                .withSubject(principalDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME))
                 .withClaim("id", loginUser.getId())
                 .withClaim("username", loginUser.getUsername())

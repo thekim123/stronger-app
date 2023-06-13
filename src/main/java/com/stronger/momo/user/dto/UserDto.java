@@ -20,6 +20,7 @@ public class UserDto {
     private String nickname;
     private String password;
     private String email;
+    private String profileImageUrl;
     private LocalDate birthday;
 
     public static UserDto from(User user) {
@@ -29,6 +30,7 @@ public class UserDto {
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .birthday(user.getBirthday())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 
