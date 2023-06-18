@@ -2,6 +2,7 @@ package com.stronger.momo.user.controller;
 
 import com.stronger.momo.common.aws.AwsS3;
 import com.stronger.momo.common.aws.AwsS3Service;
+import com.stronger.momo.post.service.PostService;
 import com.stronger.momo.user.dto.ProfileImageDto;
 import com.stronger.momo.user.dto.UserDto;
 import com.stronger.momo.user.service.UserService;
@@ -20,7 +21,6 @@ import java.io.IOException;
 public class UserController {
 
     private final UserService userService;
-    private final AwsS3Service awsS3Service;
 
     @PostMapping("/join")
     public ResponseEntity<?> join(@RequestBody UserDto dto) {

@@ -2,7 +2,7 @@ package com.stronger.momo.post.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stronger.momo.common.BaseTimeEntity;
-import com.stronger.momo.post.dto.SnsCreateDto;
+import com.stronger.momo.post.dto.PostCreateDto;
 import com.stronger.momo.team.entity.Team;
 import com.stronger.momo.user.entity.User;
 import lombok.*;
@@ -26,10 +26,11 @@ public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(nullable = false)
     private String title;
-
     private String content;
+    private String postImageUrl;
+    private String postImageKey;
 
     @JoinColumn(name = "writerId")
     @ManyToOne(fetch = FetchType.EAGER)
@@ -49,12 +50,13 @@ public class Post extends BaseTimeEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Likes> likes = new ArrayList<>();
 
+    private boolean isOpen;
     @Transient
     private boolean likeState;
     @Transient
     private int likeCount;
 
-    public void updateSns(SnsCreateDto dto) {
+    public void updateSns(PostCreateDto dto) {
         this.title = dto.getTitle();
         this.content = dto.getContent();
     }

@@ -25,10 +25,10 @@ public class CommentService {
 
     @Transactional
     public void writeComment(Authentication authentication, CommentDto dto) {
+        System.out.println(dto);
         User writer = ((PrincipalDetails) authentication.getPrincipal()).getUser();
-        Post post = postRepository.findById(dto.getPostId()).orElseThrow(() -> {
-            throw new EntityNotFoundException("해당 sns 가 존재하지 않습니다.");
-        });
+        Post post = postRepository.findById(dto.getPostId()).orElseThrow(() ->
+                new EntityNotFoundException("해당 sns 가 존재하지 않습니다."));
 
         Comment comment = Comment.builder()
                 .writer(writer)

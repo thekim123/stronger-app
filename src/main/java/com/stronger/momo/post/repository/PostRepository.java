@@ -1,6 +1,7 @@
 package com.stronger.momo.post.repository;
 
 import com.stronger.momo.post.entity.Post;
+import com.stronger.momo.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "(select tm.team.id from TeamMember tm where tm.user.id= ?1) " +
             "order by p.createdAt desc")
     Page<Post> findMyFeed(Long loginUserId, Pageable pageable);
+
+    Page<Post> findByWriter(User loginUser, Pageable pageable);
+
+    @Query("select p from Post p " +
+            "where p.writer = ?1 " +
+            "and p.team.isOpen=true " +
+            "order by p.createdAt desc")
+    Page<Post> findOthersPost(User loginUser, Pageable pageable);
+
+
 }
